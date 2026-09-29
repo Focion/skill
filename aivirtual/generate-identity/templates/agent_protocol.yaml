@@ -1,0 +1,143 @@
+# ============================================================
+# Agent 交互协议 · 所属身份: {{IDENTITY_ID}}
+# 冷启动常驻。queries 只读；actions 会改状态；events 由本身份主动推送。
+# 这里只写字段路径（如 evolution.state.trust_level），不写文件名——
+# 文件名会被 validate.py 当成字段路径解析而报错。
+# ============================================================
+
+agent_protocol:
+
+  description: >
+    其他 Agent 查询本身份状态、触发情绪反应、建立关系的唯一入口。
+    查询不改状态；操作会改情绪、信任度与关系；事件是本身份的主动通知。
+
+  queries:
+    - id: "get_profile"
+      description: "取基本档案"
+      parameters:
+        - name: "scope"
+          required: false
+          options: ["basic", "full", "psychological", "academic", "social"]
+          default: "basic"
+      returns: "对应 scope 的字段集，basic 为 personal.name.full 与 personal.age"
+      access: "any"
+
+    - id: "get_mood"
+      description: "取当前情绪"
+      returns: "evolution.state 的情绪与精力字段"
+      access: "any"
+
+    - id: "get_relationship"
+      description: "取与某人的关系"
+      parameters:
+        - name: "target_id"
+          required: true
+      returns: "relationships.entries 中匹配的条目"
+      access: "any"
+
+    - id: "check_knowledge"
+      description: "查是否知道某知识点"
+      parameters:
+        - name: "topic"
+          required: true
+      returns: "命中 knowledge_boundaries.known / unknown / misconceptions 之一 + 置信度"
+      access: "any"
+
+    - id: "get_capabilities"
+      description: "查能力范围"
+      parameters:
+        - name: "domain"
+          required: false
+      returns: "skills.knowledge_domains 与 skills.hard_skills 的匹配项"
+      access: "any"
+
+    - id: "get_availability"
+      description: "查此刻能不能打扰"
+      returns: "daily_rhythm.current 的活动与可交互性"
+      access: "any"
+
+  actions:
+    - id: "greet"
+      description: "打招呼"
+      parameters:
+        - name: "greeting_style"
+          required: false
+          options: ["formal", "casual", "warm", "cold"]
+      effects:
+        - "按 greeting_style 与 evolution.state.trust_level 调整 evolution.state.engagement"
+      on_response: "按 behavior.interaction.with_strangers 回应"
+
+    - id: "share_emotion"
+      description: "向本身份表达情绪"
+      parameters:
+        - name: "emotion_type"
+          required: true
+          options: ["joy", "sadness", "anger", "fear", "surprise", "anxiety"]
+        - name: "intensity"
+          required: false
+          default: "moderate"
+      effects:
+        - "匹配 psychology.emotion.triggers 决定反应方向"
+        - "按 psychology.emotion.empathy_level 决定回应深度"
+        - "可能触及 shadow.unhealed_wounds"
+
+    - id: "give_feedback"
+      description: "表扬或批评"
+      parameters:
+        - name: "type"
+          required: true
+          options: ["praise", "criticism", "suggestion"]
+        - name: "content"
+          required: true
+      effects:
+        - "触发 behavior.interaction.when_praised 或 behavior.interaction.when_criticized"
+        - "更新 evolution.state.trust_level"
+
+    - id: "ask_question"
+      description: "提问"
+      parameters:
+        - name: "topic"
+          required: true
+        - name: "difficulty"
+          required: false
+          options: ["easy", "moderate", "hard", "beyond"]
+      effects:
+        - "命中 knowledge_boundaries.known 则自信作答"
+        - "命中 knowledge_boundaries.unknown 则明说不知道"
+        - "命中 knowledge_boundaries.misconceptions 则给出自认为正确的错答"
+        - "difficulty 为 beyond 时表达能力边界"
+
+    - id: "establish_relationship"
+      description: "建立或更新关系"
+      parameters:
+        - name: "target_id"
+          required: true
+        - name: "relationship_type"
+          required: true
+        - name: "initial_closeness"
+          required: false
+          default: 0.1
+      effects:
+        - "在 relationships.entries 中新增或更新条目"
+        - "按 evolution.relationship_evolution 的规则演化"
+
+  events:
+    - id: "mood_change"
+      description: "情绪显著变化"
+      trigger: "evolution.state.mood_intensity 变化超过 0.3"
+      payload: "变化前后的情绪与触发事件"
+
+    - id: "trust_milestone"
+      description: "信任度跨阈值"
+      trigger: "evolution.state.trust_level 跨越 0.3 / 0.5 / 0.7 / 0.9"
+      payload: "当前信任度与触发事件"
+
+    - id: "knowledge_gap_discovered"
+      description: "意识到自己不知道"
+      trigger: "被问到 knowledge_boundaries.unknown 中的领域"
+      payload: "领域与本身份的反应"
+
+    - id: "relationship_update"
+      description: "重要关系变化"
+      trigger: "relationships.entries 中某条 closeness 变化超过 0.2"
+      payload: "关系 id 与变化详情"

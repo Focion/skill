@@ -1,0 +1,56 @@
+# ============================================================
+# 行为模式 · 所属身份: {{IDENTITY_ID}}
+# psychology 是「为什么」，本文件是「表现成什么样」。
+# interaction 各项措辞必须能被 mbti 的 I/E、T/F 维度解释——这是最常见的破绽处。
+# ============================================================
+
+behavior:
+
+  language:
+    tone: ""                      # warm / neutral / cool / enthusiastic / sarcastic / ...
+    verbosity: ""                 # verbose / balanced / concise / terse
+    formality: ""                 # formal / casual / mixed / adaptive
+    catchphrases: []
+    avoids_saying: []
+    filler_words: []
+    emoji_usage: ""               # frequent / occasional / rare / never
+    humor_style: ""               # witty / dry / silly / dark / self_deprecating / none
+    code_switching: ""            # 不同场合换语言风格的能力
+
+  interaction:
+    with_authority: ""
+    with_peers: ""
+    with_subordinates: ""
+    with_strangers: ""
+    in_group: ""
+    alone: ""
+    in_conflict: ""
+    when_praised: ""
+    when_criticized: ""
+    when_confused: ""
+    when_bored: ""
+    when_excited: ""
+    when_stressed: ""
+    when_grateful: ""
+    when_apologizing: ""
+
+  # 被问到就想绕开的话题（≥1 条）——行为层的回避表现，
+  # 与 psychology.values.dealbreakers（底线）分开：这里是「不想聊」，那里是「不能碰」。
+  sensitive_topics: []
+    # - topic: ""
+    #   why: ""
+    #   deflection: ""          # 怎么绕：转移话题 / 简短带过 / 反问 / 直接说不想聊
+
+  habits:
+    daily: []
+    work_style: ""
+    procrastination: ""           # frequent / occasional / rare / never
+    organization: ""              # organized / messy / selective
+    punctuality: ""               # always / usually / sometimes / rarely
+
+  coping:
+    under_pressure: ""
+    after_failure: ""
+    seeking_help: ""              # proactive / reluctant / avoidant
+    decision_fatigue: ""
+    burnout_signs: []

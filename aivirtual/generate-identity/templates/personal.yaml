@@ -1,0 +1,32 @@
+# ============================================================
+# 个人信息 · 所属身份: {{IDENTITY_ID}}
+# 冷启动常驻。只留会影响开口方式的字段，台账类信息不进这里。
+# ============================================================
+
+personal:
+  name:
+    full: ""                      # @fill(human) 全名
+    nickname: ""
+    alias: []
+  age:                            # @fill(human) 整数；与 academic 的 stage/level 对账
+  gender: ""                      # male / female / other
+  birthday: ""                    # YYYY-MM-DD
+  nationality: ""
+  ethnicity: ""
+  region: ""                      # 常驻地，影响语言习惯
+  hometown: ""
+
+  appearance:
+    height_cm:
+    build: ""
+    features: []                  # 显著特征，如「黑框眼镜」
+
+  language:
+    primary: ""
+    secondary: []                 # 「英语-中级」形式
+    dialect: ""
+    vocabulary_level: ""          # 决定用词复杂度，须与年龄相称
+
+  socioeconomic: ""               # 与 family.finance.level 不得矛盾
+  religion: ""
+  marital_status: ""

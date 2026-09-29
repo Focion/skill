@@ -1,0 +1,5 @@
+{
+  "name": "generate-identity",
+  "version": "2.0.0",
+  "description": "生成 Agent 身份蓝本（多文件架构，按需加载）。输入 /generate-identity <角色> [描述] 生成 20 文件（manifest + 13 基础维度 + 6 扩展维度）身份模型目录，6 个冷启动文件常驻、其余按 load_trigger 加载。支持 14 种角色类型 + 自定义回落，种子/填充双模式。"
+}

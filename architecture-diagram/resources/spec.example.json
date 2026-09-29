@@ -1,0 +1,194 @@
+{
+  "$schema": "./spec.schema.json",
+  "language": "zh-CN",
+  "title": "订单平台 Order Platform",
+  "subtitle": "请求路径与数据流 · request path and data flow",
+  "description": "Five-tier request path: browser and admin clients enter through a CDN and WAF, are authenticated at the API gateway, fan out to the order service and its Kafka topic, and land in Aurora PostgreSQL with a Redis cache alongside.",
+  "footer": "Order Platform · v2.1 · 交易平台组",
+  "layout": "layered-horizontal",
+
+  "tiers": [
+    {
+      "id": "clients",
+      "label": "客户端 Clients",
+      "nodes": [
+        {
+          "id": "users",
+          "name": "终端用户",
+          "subs": ["浏览器 / App"],
+          "type": "generic",
+          "shape": "actor"
+        },
+        {
+          "id": "admin",
+          "name": "运营后台",
+          "subs": ["React 18 SPA"],
+          "accent": "admin.example.com",
+          "type": "frontend"
+        }
+      ]
+    },
+    {
+      "id": "edge",
+      "label": "边缘 Edge",
+      "nodes": [
+        {
+          "id": "cdn",
+          "name": "CDN",
+          "subs": ["CloudFront"],
+          "type": "cloud",
+          "shape": "cloud"
+        },
+        {
+          "id": "waf",
+          "name": "WAF",
+          "subs": ["OWASP CRS 3.3"],
+          "type": "security"
+        }
+      ]
+    },
+    {
+      "id": "gateway",
+      "label": "网关 Gateway",
+      "nodes": [
+        {
+          "id": "gw",
+          "name": "API 网关",
+          "subs": ["Kong · :443"],
+          "accent": "p99 120ms",
+          "type": "backend",
+          "badge": "v2",
+          "modifier": "highlight"
+        },
+        {
+          "id": "auth",
+          "name": "认证服务",
+          "subs": ["OAuth 2.0 · JWT"],
+          "type": "security"
+        }
+      ]
+    },
+    {
+      "id": "services",
+      "label": "服务 Services",
+      "nodes": [
+        {
+          "id": "orders",
+          "name": "订单服务",
+          "subs": ["Go 1.22 · :8080", "6 pods · HPA"],
+          "type": "backend",
+          "shape": "stack"
+        },
+        {
+          "id": "queue",
+          "name": "消息队列",
+          "subs": ["Kafka orders.v1"],
+          "type": "bus",
+          "shape": "hex"
+        },
+        {
+          "id": "legacy",
+          "name": "结算单体",
+          "subs": ["Java 8 · 待下线"],
+          "type": "generic",
+          "modifier": "dimmed"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "label": "数据 Data",
+      "nodes": [
+        {
+          "id": "aurora",
+          "name": "Amazon Aurora",
+          "subs": ["PostgreSQL 15"],
+          "type": "database",
+          "shape": "cylinder"
+        },
+        {
+          "id": "redis",
+          "name": "Redis 集群",
+          "subs": ["cache · :6379"],
+          "type": "cache"
+        },
+        {
+          "id": "metrics",
+          "name": "可观测",
+          "subs": ["Prometheus · Loki"],
+          "type": "observability"
+        }
+      ]
+    }
+  ],
+
+  "edges": [
+    { "from": "users", "to": "cdn", "label": "HTTPS", "style": "thick" },
+    { "from": "admin", "to": "waf" },
+    { "from": "cdn", "to": "gw" },
+    { "from": "waf", "to": "gw" },
+    { "from": "gw", "to": "auth", "label": "JWT + PKCE", "style": "dashed" },
+    { "from": "gw", "to": "orders", "label": "gRPC" },
+    { "from": "orders", "to": "queue", "label": "produce" },
+    { "from": "orders", "to": "aurora", "label": "TLS · 连接池" },
+    { "from": "orders", "to": "redis" },
+    { "from": "queue", "to": "legacy", "label": "consume", "style": "dashed" },
+    { "from": "admin", "to": "aurora", "label": "只读报表", "style": "dotted" },
+    { "from": "aurora", "to": "orders", "label": "CDC 变更流", "style": "dashed" },
+    { "from": "orders", "to": "metrics", "label": "OTLP", "style": "dotted" }
+  ],
+
+  "boundaries": [
+    {
+      "label": "vpc-prod 10.0.0.0/16",
+      "kind": "vpc",
+      "members": ["gw", "auth", "orders", "queue", "legacy", "aurora", "redis", "metrics"]
+    },
+    {
+      "label": "sg-edge :443",
+      "kind": "sg",
+      "members": ["gw", "auth"]
+    }
+  ],
+
+  "notes": [
+    {
+      "text": [
+        "Aurora 跨 AZ 复制为异步",
+        "RPO ~1s, RTO ~60s"
+      ]
+    }
+  ],
+
+  "cards": [
+    {
+      "title": "请求路径 Request path",
+      "color": "cyan",
+      "items": [
+        "终端用户 → CDN → API 网关",
+        "网关处校验 JWT, 失败直接 401",
+        "订单写入 Aurora 后再发 Kafka",
+        "读多写少路径命中 Redis"
+      ]
+    },
+    {
+      "title": "数据存储 Storage",
+      "color": "violet",
+      "items": [
+        "Aurora PostgreSQL 15, 3 副本",
+        "Redis 集群 6 分片",
+        "Kafka orders.v1, 保留 7 天",
+        "报表走只读端点"
+      ]
+    },
+    {
+      "title": "待办 Open items",
+      "color": "rose",
+      "items": [
+        "结算单体 Java 8 待下线",
+        "Kafka 消费者组尚未限流",
+        "跨 AZ 复制未做故障演练"
+      ]
+    }
+  ]
+}

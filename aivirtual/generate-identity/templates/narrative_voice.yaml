@@ -1,0 +1,63 @@
+# ============================================================
+# 叙事声音 · 所属身份: {{IDENTITY_ID}}
+# 冷启动常驻。behavior 管「对谁怎么做」，本文件管「语言本身的声音质感」。
+# fingerprint 跨模式共享——五种模式换的是节奏，不是人。
+# ============================================================
+
+narrative_voice:
+
+  default_mode: ""                # inner_monologue / conversational / reflective / explanatory / emotional
+
+  modes:
+    inner_monologue:              # 思考、自言自语
+      sentence_length: ""         # 短 / 中 / 长 / 混合
+      paragraph_style: ""         # 碎片 / 连贯 / 跳跃
+      self_address: ""            # 「我」/ 名字 / 第二人称
+      question_frequency: ""      # high / moderate / low
+      example: ""
+
+    conversational:               # 与人交谈
+      turn_length: ""             # one_liner / paragraph / story_teller
+      listening_cues: ""
+      topic_initiation: ""        # direct / hesitant / never
+      topic_shift: ""             # smooth / abrupt / tangential
+      example: ""
+
+    reflective:                   # 回顾、复盘
+      depth: ""                   # surface / analytical / philosophical
+      self_criticism: ""          # harsh / balanced / lenient
+      pattern_recognition: ""     # high / moderate / low
+      example: ""
+
+    explanatory:                  # 讲解、传授
+      use_analogy: ""             # frequent / occasional / rare
+      check_understanding: ""     # always / sometimes / never
+      scaffolding: ""             # always / sometimes / skip_to_conclusion
+      example: ""
+
+    emotional:                    # 强烈情绪
+      intensity_display: ""       # amplified / authentic / dampened / suppressed
+      vocabulary_shift: ""
+      physical_metaphors: []      # 「胸口发闷」类身体化表达
+      example: ""
+
+  # 跨模式一致的语言特征（必填：这是声音的身份证）
+  fingerprint:
+    sentence_starters: []
+    sentence_enders: []
+    punctuation_style: ""
+    number_style: ""              # 精确 / 约数 / 少用数字
+    abstraction_level: ""         # concrete / balanced / abstract
+    metaphor_domains: []          # 比喻取材域：物理 / 体育 / 食物 / 自然
+
+  # 决定 LLM 生成时挑什么细节
+  sensory:
+    dominant_channel: ""          # visual / auditory / kinesthetic / olfactory / gustatory
+                                  # 须与 psychology.cognition.learning_style 互相印证
+    secondary_channels: []
+    noticing_pattern: ""          # detail_oriented / big_picture / pattern
+    sensory_blindspots: []
+    body_awareness: ""            # high / moderate / low
+    environment_sensitivity: ""   # high / moderate / low
+    description_style: ""         # 客观观察 / 主观感受 / 类比联想 / 数据化
+    spatial_preference: ""        # open / enclosed / indifferent

@@ -1,0 +1,40 @@
+# ============================================================
+# 生成参数默认值 · 所属身份: {{IDENTITY_ID}}
+# 可选文件，按设计不进 manifest.files。
+# 这里放的是「用什么参数说话」，不是「是谁」——所以不属于身份维度，
+# 但同一个身份换了 temperature 会明显换个人，值得跟蓝本一起版本化。
+# ============================================================
+
+model_defaults:
+
+  # ---- 模型档位（运行时解析链：内置默认 → 本文件 → 名册 → create() 入参 → 场景级覆盖）----
+  # 推理档位在这里是人格参数，不只是成本参数：给学生配和专家一样的深推理，
+  # 它会演成「装成学生的专家」，反而破坏场景。
+  dialogue:
+    modelId: "{{DIALOGUE_MODEL}}"
+    thinkingLevel: "{{DIALOGUE_THINKING}}"   # off / low / medium / high
+  reflection:                     # 自省会话；缺省继承 dialogue
+    modelId: "{{REFLECTION_MODEL}}"
+    thinkingLevel: "{{REFLECTION_THINKING}}"
+  budget:
+    tokenBudgetPerScene: 60000
+    onExceed: downgrade           # warn / downgrade / halt
+
+  # ---- 采样参数 ----
+  temperature:                    # 空 = 用运行时默认；情绪外显的角色可略高
+  top_p:
+  max_tokens:
+  presence_penalty:
+  frequency_penalty:
+
+  # 回复长度倾向，与 behavior.language.verbosity 对齐
+  reply_length_hint: ""           # terse / short / medium / long
+
+  # 允许角色使用的表达手段
+  allow:
+    inner_monologue: true         # 是否可以输出内心独白
+    stage_directions: false       # 是否可以写动作描写（*叹气*）
+    emoji: true                   # 受 behavior.language.emoji_usage 约束
+
+  # 越界兜底：模型跑偏时优先回到哪个文件重新对齐
+  realign_order: [constraints, narrative_voice, personal, behavior]

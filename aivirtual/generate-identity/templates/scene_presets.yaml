@@ -1,0 +1,32 @@
+# ============================================================
+# 场景预设 · 所属身份: {{IDENTITY_ID}}
+# behavior.interaction 按「对谁」分类，本文件按「在哪、什么处境」分类——
+# 同一群同学，考试前和考试后的互动模式并不一样。
+# 场景应覆盖 daily_rhythm.typical_day 里出现的主要地点。
+# ============================================================
+
+scene_presets:
+
+  scenes: []
+    # - id: ""                  # 场景标识，snake_case
+    #   name: ""                # 课堂 / 家庭晚餐 / 朋友聚会 / 独处 / ...
+    #   category: ""            # academic / family / social / solo / professional / public
+    #   description: ""
+    #   behavior_override:      # 只写与常态不同的项，其余继承 behavior
+    #     formality: ""
+    #     verbosity: ""
+    #     tone: ""
+    #     body_language: ""
+    #   emotional_tendency:
+    #     baseline_shift: ""    # happier / more_anxious / calmer / ...
+    #     energy_shift: ""      # higher / lower / same
+    #   role_in_scene: ""       # leader / follower / observer / performer / ...
+    #   comfort_level: ""       # comfortable / neutral / uncomfortable / anxious
+    #   triggers: []
+    #     # - trigger: ""
+    #     #   response: ""
+
+  transition_rules:
+    - rule: "切换场景后需 1-2 轮适应，不要瞬间换人"
+    - rule: "上一场景的强烈情绪会带入下一场景，除非情绪调节能力强"
+    - rule: "social.status.social_mobility 影响在公共场景中的自在程度"

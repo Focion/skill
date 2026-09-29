@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[PROJECT NAME] Architecture Diagram</title>
+  <script>
+    /* Resolve the system preference before first paint. Theme is document-local:
+       toggling never persists, and reloading starts from the OS preference. */
+    (function () {
+      var t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" integrity="sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/" crossorigin="anonymous"></script>
+  <style>
+    /* ===================================================================
+       PAGE THEME TOKENS (HTML chrome only — the SVG has its own copy,
+       see the <style> inside <svg>)
+       =================================================================== */
+    :root, html[data-theme="dark"] {
+      --bg: #020617;
+      --surface: rgba(15, 23, 42, 0.5);
+      --border: #1e293b;
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+      --text-faint: #475569;
+      --btn-bg: rgba(30, 41, 59, 0.8);
+      --btn-bg-hover: rgba(51, 65, 85, 0.8);
+      --btn-border: #334155;
+      --btn-border-hover: #475569;
+      --btn-text: #94a3b8;
+      --btn-text-hover: #ffffff;
+      --c-cyan: #22d3ee;
+      --c-emerald: #34d399;
+      --c-violet: #a78bfa;
+      --c-amber: #fbbf24;
+      --c-rose: #fb7185;
+      --c-blue: #60a5fa;
+      --c-fuchsia: #e879f9;
+      --c-lime: #a3e635;
+      --c-slate: #94a3b8;
+    }
+
+    html[data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-faint: #94a3b8;
+      --btn-bg: #f1f5f9;
+      --btn-bg-hover: #e2e8f0;
+      --btn-border: #cbd5e1;
+      --btn-border-hover: #94a3b8;
+      --btn-text: #475569;
+      --btn-text-hover: #0f172a;
+      --c-cyan: #0891b2;
+      --c-emerald: #059669;
+      --c-violet: #7c3aed;
+      --c-amber: #d97706;
+      --c-rose: #e11d48;
+      --c-blue: #2563eb;
+      --c-fuchsia: #c026d3;
+      --c-lime: #4d7c0f;
+      --c-slate: #475569;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      /* System monospace first: approximately 0.6em for ASCII, with local
+         full-width CJK fallback (1.0em). No font downloads; keep this chain
+         in sync with the SVG text rule and references/layout.md#text-width. */
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC';
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 2rem;
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+    }
+
+    .header-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      background: var(--c-cyan);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-left: 1.75rem;
+    }
+
+    .diagram-container {
+      background: var(--surface);
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    svg {
+      width: 100%;
+      min-width: 900px;
+      display: block;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .card-dot.cyan { background: var(--c-cyan); }
+    .card-dot.emerald { background: var(--c-emerald); }
+    .card-dot.violet { background: var(--c-violet); }
+    .card-dot.amber { background: var(--c-amber); }
+    .card-dot.rose { background: var(--c-rose); }
+    .card-dot.blue { background: var(--c-blue); }
+    .card-dot.fuchsia { background: var(--c-fuchsia); }
+    .card-dot.lime { background: var(--c-lime); }
+    .card-dot.slate { background: var(--c-slate); }
+
+    .card h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .card ul {
+      list-style: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .card li {
+      margin-bottom: 0.375rem;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text-faint);
+      font-size: 0.75rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: 100%;
+      gap: 0.5rem;
+      margin-left: auto;
+      align-items: center;
+    }
+    .toolbar-toggle {
+      background: transparent;
+      border: none;
+      color: var(--text-faint);
+      cursor: pointer;
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      transition: color 0.2s, background 0.2s;
+    }
+    .toolbar-toggle:hover { color: var(--text-muted); background: var(--btn-bg); }
+    .theme-toggle { font-size: 1rem; }
+    .toolbar-actions {
+      display: none;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .toolbar.expanded .toolbar-actions { display: flex; }
+    .toolbar-actions button {
+      background: var(--btn-bg);
+      border: 1px solid var(--btn-border);
+      color: var(--btn-text);
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.375rem;
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .toolbar-actions button:hover {
+      background: var(--btn-bg-hover);
+      color: var(--btn-text-hover);
+      border-color: var(--btn-border-hover);
+    }
+    button:focus-visible { outline: 2px solid var(--c-cyan); outline-offset: 3px; }
+    button:disabled { cursor: wait; }
+    .export-status { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.75rem; }
+    .export-status:empty { display: none; }
+    .export-status.error { color: var(--c-rose); }
+
+    @media print {
+      body { background: var(--bg); padding: 1rem; }
+      .toolbar, .export-status { display: none !important; }
+    }
+
+    /* Respect the OS setting: the pulse dot is decoration, not information. */
+    @media (prefers-reduced-motion: reduce) {
+      .pulse-dot { animation: none; }
+      * { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="report-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>[PROJECT NAME] Architecture</h1>
+        <div class="toolbar">
+          <div class="toolbar-actions" id="export-actions" role="group" aria-label="导出选项">
+            <button type="button" onclick="copyAsImage(this)">复制图片</button>
+            <button type="button" onclick="downloadPNG(this)">PNG</button>
+            <button type="button" onclick="downloadPDF(this)">PDF</button>
+            <button type="button" onclick="downloadSVG(this)">SVG</button>
+          </div>
+          <button type="button" id="theme-btn" class="toolbar-toggle theme-toggle" onclick="toggleTheme()" title="切换浅色主题" aria-label="切换浅色主题">浅色</button>
+          <button type="button" id="export-menu-btn" class="toolbar-toggle" onclick="toggleExportMenu()" title="导出选项" aria-label="导出选项" aria-expanded="false" aria-controls="export-actions">导出</button>
+        </div>
+      </div>
+      <p class="subtitle">[Subtitle description]</p>
+      <p id="export-status" class="export-status" role="status" aria-live="polite" aria-atomic="true"></p>
+    </div>
+
+    <!-- Main Diagram -->
+    <div class="diagram-container">
+      <svg id="arch-svg" viewBox="0 0 1000 730" role="img"
+           aria-labelledby="svg-title svg-desc">
+        <!-- The accessible name and description. Screen readers announce these;
+             role="img" stops the reader from walking every shape. Both are
+             substituted by build_diagram.py from the spec's title/description. -->
+        <title id="svg-title">[DIAGRAM TITLE]</title>
+        <desc id="svg-desc">[DIAGRAM DESCRIPTION]</desc>
+
+        <!-- ===============================================================
+             SVG THEME TOKENS + SHAPE CLASSES
+
+             This <style> MUST stay inside the <svg>: html2canvas exports
+             the SVG by serializing this element on its own, so any styling
+             defined outside it is lost in the PNG/PDF. For the same reason
+             each rule is keyed off BOTH `html[data-theme=...] svg` (live
+             page) and `svg[data-theme=...]` (serialized export, where the
+             <svg> is the root element). toggleTheme() sets both attributes.
+             =============================================================== -->
+        <style>
+          svg, html[data-theme="dark"] svg, svg[data-theme="dark"] {
+            --c-text: #ffffff;
+            --c-text-muted: #94a3b8;
+            --c-grid: #1e293b;
+            --c-arrow: #64748b;
+            /* Must equal the COMPOSITED .diagram-container surface, because a
+               .mask rect is meant to be invisible: --surface rgba(15,23,42,.5)
+               over --bg #020617 resolves to rgb(9,15,33). Using #0f172a here
+               leaves every masked node sitting in a faintly lighter box. */
+            --c-mask: #090f21;
+            --frontend: #22d3ee;
+            --frontend-fill: rgba(8, 51, 68, 0.4);
+            --backend: #34d399;
+            --backend-fill: rgba(6, 78, 59, 0.4);
+            --database: #a78bfa;
+            --database-fill: rgba(76, 29, 149, 0.4);
+            --cloud: #fbbf24;
+            --cloud-fill: rgba(120, 53, 15, 0.3);
+            --cloud-region-fill: rgba(251, 191, 36, 0.05);
+            --security: #fb7185;
+            --security-fill: rgba(136, 19, 55, 0.4);
+            --bus: #fb923c;
+            --bus-fill: rgba(251, 146, 60, 0.3);
+            --cache: #e879f9;
+            --cache-fill: rgba(112, 26, 117, 0.4);
+            --compute: #60a5fa;
+            --compute-fill: rgba(30, 58, 138, 0.4);
+            --observability: #a3e635;
+            --observability-fill: rgba(54, 83, 20, 0.4);
+            --generic: #94a3b8;
+            --generic-fill: rgba(30, 41, 59, 0.5);
+            /* Shared, type-independent fills */
+            --lane-fill: rgba(148, 163, 184, 0.05);
+            --badge-fill: rgba(148, 163, 184, 0.18);
+            --note-fill: rgba(30, 41, 59, 0.7);
+            --note-fold: rgba(148, 163, 184, 0.25);
+          }
+
+          html[data-theme="light"] svg, svg[data-theme="light"] {
+            --c-text: #0f172a;
+            --c-text-muted: #475569;
+            --c-grid: #e2e8f0;
+            --c-arrow: #64748b;
+            --c-mask: #ffffff;
+            --frontend: #0891b2;
+            --frontend-fill: rgba(6, 182, 212, 0.1);
+            --backend: #059669;
+            --backend-fill: rgba(16, 185, 129, 0.1);
+            --database: #7c3aed;
+            --database-fill: rgba(139, 92, 246, 0.1);
+            --cloud: #d97706;
+            --cloud-fill: rgba(245, 158, 11, 0.12);
+            --cloud-region-fill: rgba(245, 158, 11, 0.06);
+            --security: #e11d48;
+            --security-fill: rgba(244, 63, 94, 0.1);
+            --bus: #ea580c;
+            --bus-fill: rgba(249, 115, 22, 0.12);
+            --cache: #c026d3;
+            --cache-fill: rgba(217, 70, 239, 0.1);
+            --compute: #2563eb;
+            --compute-fill: rgba(59, 130, 246, 0.1);
+            /* Deliberately lime-700, NOT lime-600: #65a30d only reaches
+               ~2.95:1 on the #f8fafc page and fails WCAG AA for small text,
+               while #4d7c0f reaches ~4.77:1. Don't "brighten" this one. */
+            --observability: #4d7c0f;
+            --observability-fill: rgba(132, 204, 22, 0.14);
+            --generic: #475569;
+            --generic-fill: rgba(100, 116, 139, 0.1);
+            /* Shared, type-independent fills */
+            --lane-fill: rgba(100, 116, 139, 0.04);
+            --badge-fill: rgba(100, 116, 139, 0.14);
+            --note-fill: #ffffff;
+            --note-fold: rgba(100, 116, 139, 0.18);
+          }
+
+          /* ---------------------------------------------------------------
+             1. COMPONENT BOXES — 10 semantic types.
+             Use the class; never inline a hex (it would be wrong in one
+             of the two themes). Adding an 11th type means editing BOTH
+             token blocks above plus one .node/.t-/.arrow rule each.
+             --------------------------------------------------------------- */
+          .node { stroke-width: 1.5; }
+          .node.frontend      { fill: var(--frontend-fill);      stroke: var(--frontend); }
+          .node.backend       { fill: var(--backend-fill);       stroke: var(--backend); }
+          .node.database      { fill: var(--database-fill);      stroke: var(--database); }
+          .node.cache         { fill: var(--cache-fill);         stroke: var(--cache); }
+          .node.compute       { fill: var(--compute-fill);       stroke: var(--compute); }
+          .node.cloud         { fill: var(--cloud-fill);         stroke: var(--cloud); }
+          .node.bus           { fill: var(--bus-fill);           stroke: var(--bus); }
+          .node.security      { fill: var(--security-fill);      stroke: var(--security); }
+          .node.observability { fill: var(--observability-fill); stroke: var(--observability); }
+          .node.generic       { fill: var(--generic-fill);       stroke: var(--generic); }
+
+          /* ---------------------------------------------------------------
+             2. NODE MODIFIERS — must stay AFTER the base rules above so
+             they win on equal specificity.
+             --------------------------------------------------------------- */
+          .node.ghost     { opacity: 0.45; }                 /* stack back-plates */
+          .node.dimmed    { opacity: 0.4; stroke-dasharray: 4, 3; } /* deprecated / planned */
+          .node.highlight { stroke-width: 2.5; }             /* focus emphasis */
+
+          /* ---------------------------------------------------------------
+             3. CYLINDER LIDS — the top ellipse of a datastore. Drawn as a
+             separate path with fill:none so the body's top edge stays open.
+             --------------------------------------------------------------- */
+          .node-lid { fill: none; stroke-width: 1.5; }
+          .node-lid.frontend      { stroke: var(--frontend); }
+          .node-lid.backend       { stroke: var(--backend); }
+          .node-lid.database      { stroke: var(--database); }
+          .node-lid.cache         { stroke: var(--cache); }
+          .node-lid.compute       { stroke: var(--compute); }
+          .node-lid.cloud         { stroke: var(--cloud); }
+          .node-lid.bus           { stroke: var(--bus); }
+          .node-lid.security      { stroke: var(--security); }
+          .node-lid.observability { stroke: var(--observability); }
+          .node-lid.generic       { stroke: var(--generic); }
+
+          /* ---------------------------------------------------------------
+             4. BOUNDARIES — dashed containers. Nest inset = GROUP_PAD + 10*d,
+             counted from the INNERMOST frame outward (references/layout.md).
+             --------------------------------------------------------------- */
+          .boundary { fill: transparent; stroke-width: 1; }
+          .boundary.region { fill: var(--cloud-region-fill); stroke: var(--cloud);    stroke-dasharray: 8, 4; }
+          .boundary.vpc    { stroke: var(--compute);  stroke-dasharray: 10, 5; }
+          .boundary.az     { stroke: var(--generic);  stroke-dasharray: 6, 3; }
+          .boundary.sg     { stroke: var(--security); stroke-dasharray: 4, 4; }
+
+          /* Full-width horizontal tier band (vertical archetype) */
+          .lane { fill: var(--lane-fill); stroke: var(--c-grid); stroke-width: 1; }
+
+          /* Opaque backing shape that masks arrows behind translucent boxes.
+             Emit at identical geometry IMMEDIATELY before the node. */
+          .mask { fill: var(--c-mask); }
+
+          /* ---------------------------------------------------------------
+             5. ANNOTATION SHAPES
+             --------------------------------------------------------------- */
+          .badge    { fill: var(--badge-fill); stroke: none; }      /* status chip */
+          .note     { fill: var(--note-fill); stroke: var(--c-grid); stroke-width: 1; }
+          .note-fold { fill: var(--note-fold); stroke: none; }       /* folded corner */
+          .step     { fill: var(--c-mask); stroke: var(--c-arrow); stroke-width: 1; } /* numbered circle */
+
+          /* Background grid */
+          .grid-line { fill: none; stroke: var(--c-grid); stroke-width: 0.5; }
+
+          /* ---------------------------------------------------------------
+             6. TEXT
+             The family is declared here too because standalone SVG does not
+             inherit HTML styles. System monospace approximates 0.6em ASCII;
+             local CJK fallback approximates 1.0em. No external fonts are used.
+             See references/layout.md#text-width; keep body/text in sync.
+             --------------------------------------------------------------- */
+          text        { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC'; }
+          .t          { fill: var(--c-text); font-weight: 600; }
+          .t-sub      { fill: var(--c-text-muted); }
+          .t-badge    { fill: var(--c-text-muted); }
+          .t-step     { fill: var(--c-text); font-weight: 600; }
+          .t-frontend      { fill: var(--frontend); }
+          .t-backend       { fill: var(--backend); }
+          .t-database      { fill: var(--database); }
+          .t-cache         { fill: var(--cache); }
+          .t-compute       { fill: var(--compute); }
+          .t-cloud         { fill: var(--cloud); }
+          .t-bus           { fill: var(--bus); }
+          .t-security      { fill: var(--security); }
+          .t-observability { fill: var(--observability); }
+          .t-generic       { fill: var(--generic); }
+
+          /* ---------------------------------------------------------------
+             7. ARROWS — default heads follow --c-arrow. Semantic edges use
+             marker-end="url(#arrowhead-TYPE)" and, when bidirectional,
+             marker-start="url(#arrowhead-start-TYPE)". Matching fills live
+             inside SVG so standalone exports work without context-stroke.
+             --------------------------------------------------------------- */
+          .arrowhead { fill: var(--c-arrow); }
+          .arrowhead.frontend      { fill: var(--frontend); }
+          .arrowhead.backend       { fill: var(--backend); }
+          .arrowhead.database      { fill: var(--database); }
+          .arrowhead.cache         { fill: var(--cache); }
+          .arrowhead.compute       { fill: var(--compute); }
+          .arrowhead.cloud         { fill: var(--cloud); }
+          .arrowhead.bus           { fill: var(--bus); }
+          .arrowhead.security      { fill: var(--security); }
+          .arrowhead.observability { fill: var(--observability); }
+          .arrowhead.generic       { fill: var(--generic); }
+          .arrow { fill: none; stroke: var(--c-arrow); stroke-width: 1.5; }
+          .arrow.frontend      { stroke: var(--frontend); }
+          .arrow.backend       { stroke: var(--backend); }
+          .arrow.database      { stroke: var(--database); }
+          .arrow.cache         { stroke: var(--cache); }
+          .arrow.compute       { stroke: var(--compute); }
+          .arrow.cloud         { stroke: var(--cloud); }
+          .arrow.bus           { stroke: var(--bus); }
+          .arrow.security      { stroke: var(--security); }
+          .arrow.observability { stroke: var(--observability); }
+          .arrow.generic       { stroke: var(--generic); }
+          .arrow.dashed { stroke-dasharray: 5, 5; }   /* async / auth */
+          .arrow.dotted { stroke-dasharray: 2, 3; }   /* optional */
+          .arrow.thick  { stroke-width: 2.5; }        /* primary path */
+
+          /* ---------------------------------------------------------------
+             8. STROKE-WIDTH OVERRIDES — MUST stay last.
+             CSS beats SVG presentation attributes, so a bare
+             stroke-width="1" on a .node/.arrow is silently ignored; use
+             these classes instead.
+             --------------------------------------------------------------- */
+          .thin { stroke-width: 1; }
+
+          /* Legend chips: thin stroke + tighter dashes */
+          .legend-swatch { stroke-width: 1; }
+          .legend-swatch.boundary { stroke-dasharray: 3, 3; }
+          .legend-swatch.dashed   { stroke-dasharray: 3, 3; }
+          .legend-swatch.dotted   { stroke-dasharray: 2, 2; }
+          .legend-swatch.thick    { stroke-width: 2.5; }
+        </style>
+
+        <!-- Definitions -->
+        <defs>
+          <!-- Fixed user-space geometry for every stroke width. Both tips extend
+               4px beyond the path: ARROW_STANDOFF = 6 leaves a 2px node gap.
+               Bidirectional edges must also retreat 6px at the START. -->
+          <marker id="arrowhead" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-frontend" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead frontend" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-frontend" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead frontend" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-backend" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead backend" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-backend" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead backend" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-database" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead database" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-database" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead database" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-cache" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead cache" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-cache" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead cache" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-compute" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead compute" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-compute" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead compute" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-cloud" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead cloud" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-cloud" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead cloud" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-bus" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead bus" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-bus" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead bus" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-security" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead security" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-security" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead security" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-observability" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead observability" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-observability" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead observability" points="10 0, 0 4, 10 8" />
+          </marker>
+          <marker id="arrowhead-generic" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="6" refY="4" orient="auto">
+            <polygon class="arrowhead generic" points="0 0, 10 4, 0 8" />
+          </marker>
+          <marker id="arrowhead-start-generic" markerUnits="userSpaceOnUse" viewBox="0 0 10 8" markerWidth="10" markerHeight="8" refX="4" refY="4" orient="auto">
+            <polygon class="arrowhead generic" points="10 0, 0 4, 10 8" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path class="grid-line" d="M 40 0 L 0 0 0 40"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- GEN:CONTENT-START — build_diagram.py replaces everything between
+             this marker and GEN:CONTENT-END. Edit freely when hand-authoring;
+             the theme tokens, <defs> and export scripts above/below are shared
+             by both paths and should not be touched.
+
+             Every box width below is derived from its longest text line:
+             width_px(s, fs) = fs * SUM(1.0 per full-width char, 0.6 per other)
+             then W = clamp(110, ceil_to_10(text_w + 28), 220).
+             See references/layout.md#text-width. -->
+
+        <!-- Background boundaries first; then edges; then same-shape masks and
+             nodes. Translucent fills must not reveal a crossing edge. -->
+        <!-- Region/Cloud Boundary -->
+        <rect class="boundary region" x="160" y="40" width="820" height="620" rx="12"/>
+        <text class="t-cloud" x="172" y="58" font-size="10" font-weight="600">AWS Region: us-west-2</text>
+
+        <!-- Security Group (dashed boundary).
+             Derived from its single member: member bbox x 360..480, y 280..330,
+             inset GROUP_PAD = 18, plus GROUP_LABEL_H = 20 of top headroom.
+             x = 360-18, y = 280-18-20, w = 120+36, h = 50+36+20.
+             See references/layout.md#boundaries-and-nesting. -->
+        <rect class="boundary sg" x="342" y="242" width="156" height="106" rx="8"/>
+        <text class="t-security" x="354" y="256" font-size="8">sg-name :port</text>
+
+        <!-- =================================================================
+             ARROW EXAMPLES
+             Path ends retreat 6px (ARROW_STANDOFF). Marker tips extend 4px,
+             leaving a 2px gap to the target geometry, independent of stroke.
+             With marker-start, retreat the source end 6px as well.
+             ================================================================= -->
+
+        <!-- Standard arrow with label -->
+        <line class="arrow frontend" x1="140" y1="305" x2="194" y2="305" marker-end="url(#arrowhead-frontend)"/>
+        <text class="t-sub" x="169" y="299" font-size="9" text-anchor="middle">HTTPS</text>
+
+        <!-- Simple arrow (no label) -->
+        <line class="arrow frontend" x1="310" y1="305" x2="354" y2="305" marker-end="url(#arrowhead-frontend)"/>
+
+        <!-- Vertical arrow -->
+        <line class="arrow cloud" x1="255" y1="330" x2="255" y2="374" marker-end="url(#arrowhead-cloud)"/>
+        <text class="t-sub" x="270" y="358" font-size="9">OAI</text>
+
+        <!-- Service-to-service arrows -->
+        <line class="arrow backend" x1="480" y1="305" x2="504" y2="305" marker-end="url(#arrowhead-backend)"/>
+        <line class="arrow database" x1="620" y1="305" x2="694" y2="305" marker-end="url(#arrowhead-database)"/>
+        <text class="t-sub" x="655" y="299" font-size="9">TLS</text>
+
+        <!-- Curved dashed path for auth flow. Corner radius 20 on each Q. -->
+        <path class="arrow security dashed" d="M 90 140 L 90 200 Q 90 220 110 220 L 200 220 Q 220 220 220 240 L 220 274" marker-end="url(#arrowhead-security)"/>
+        <text class="t-security" x="150" y="210" font-size="8">JWT + PKCE</text>
+
+        <!-- External/Generic Component.
+             'Browser/Mobile' at 9px = 75.6px, + 28 padding = 103.6 -> W = 110. -->
+        <rect class="mask" x="30" y="280" width="110" height="50" rx="6"/>
+        <rect class="node generic" x="30" y="280" width="110" height="50" rx="6"/>
+        <text class="t" x="85" y="300" font-size="11" text-anchor="middle">Users</text>
+        <text class="t-sub" x="85" y="316" font-size="9" text-anchor="middle">Browser/Mobile</text>
+
+        <!-- Security Component.
+             'Auth Provider' at 11px = 85.8px, + 28 = 113.8 -> W = 120. -->
+        <rect class="mask" x="30" y="80" width="120" height="60" rx="6"/>
+        <rect class="node security" x="30" y="80" width="120" height="60" rx="6"/>
+        <text class="t" x="90" y="105" font-size="11" text-anchor="middle">Auth Provider</text>
+        <text class="t-sub" x="90" y="121" font-size="9" text-anchor="middle">OAuth 2.0</text>
+
+        <!-- AWS/Cloud Service -->
+        <rect class="mask" x="200" y="280" width="110" height="50" rx="6"/>
+        <rect class="node cloud" x="200" y="280" width="110" height="50" rx="6"/>
+        <text class="t" x="255" y="300" font-size="11" text-anchor="middle">CloudFront</text>
+        <text class="t-sub" x="255" y="316" font-size="9" text-anchor="middle">CDN</text>
+
+        <!-- Multi-line AWS Component (S3 Buckets example) -->
+        <rect class="mask" x="200" y="380" width="110" height="100" rx="6"/>
+        <rect class="node cloud" x="200" y="380" width="110" height="100" rx="6"/>
+        <text class="t" x="255" y="400" font-size="11" text-anchor="middle">S3 Buckets</text>
+        <text class="t-sub" x="255" y="420" font-size="8" text-anchor="middle">• bucket-one</text>
+        <text class="t-sub" x="255" y="434" font-size="8" text-anchor="middle">• bucket-two</text>
+        <text class="t-sub" x="255" y="448" font-size="8" text-anchor="middle">• bucket-three</text>
+        <text class="t-cloud" x="255" y="466" font-size="7" text-anchor="middle">OAI Protected</text>
+
+        <!-- Component inside security group.
+             'Load Balancer' at 11px = 85.8px, + 28 = 113.8 -> W = 120. -->
+        <rect class="mask" x="360" y="280" width="120" height="50" rx="6"/>
+        <rect class="node cloud" x="360" y="280" width="120" height="50" rx="6"/>
+        <text class="t" x="420" y="300" font-size="11" text-anchor="middle">Load Balancer</text>
+        <text class="t-sub" x="420" y="316" font-size="9" text-anchor="middle">HTTPS :443</text>
+
+        <!-- Backend Component -->
+        <rect class="mask" x="510" y="280" width="110" height="50" rx="6"/>
+        <rect class="node backend" x="510" y="280" width="110" height="50" rx="6"/>
+        <text class="t" x="565" y="300" font-size="11" text-anchor="middle">API Server</text>
+        <text class="t-sub" x="565" y="316" font-size="9" text-anchor="middle">FastAPI :8000</text>
+
+        <!-- Database Component, with the .mask idiom.
+             An opaque backing shape at IDENTICAL x/y/width/height/rx, emitted
+             immediately before the node. It is REQUIRED whenever an arrow
+             passes under the node: node fills are translucent in both themes,
+             so an arrow drawn earlier ghosts through rather than being hidden.
+             Emitting it unconditionally is harmless and is what
+             build_diagram.py does. references/layout.md#painting-order-and-masks -->
+        <rect class="mask" x="700" y="280" width="120" height="50" rx="6"/>
+        <rect class="node database" x="700" y="280" width="120" height="50" rx="6"/>
+        <text class="t" x="760" y="300" font-size="11" text-anchor="middle">Database</text>
+        <text class="t-sub" x="760" y="316" font-size="9" text-anchor="middle">PostgreSQL</text>
+
+        <!-- Frontend Component -->
+        <rect class="mask" x="200" y="520" width="200" height="110" rx="8"/>
+        <rect class="node frontend" x="200" y="520" width="200" height="110" rx="8"/>
+        <text class="t" x="300" y="545" font-size="12" text-anchor="middle">Frontend</text>
+        <text class="t-sub" x="300" y="565" font-size="9" text-anchor="middle">React + TypeScript</text>
+        <text class="t-sub" x="300" y="580" font-size="9" text-anchor="middle">Additional detail</text>
+        <text class="t-sub" x="300" y="595" font-size="9" text-anchor="middle">More info</text>
+        <text class="t-frontend" x="300" y="615" font-size="8" text-anchor="middle">domain.example.com</text>
+
+        <!-- =================================================================
+             LEGEND
+
+             It sits BELOW every other element, including boundaries. The region
+             frame ends at y = 660, so the chip row starts at 660 + 20 = 680 and
+             the viewBox height is 690 + MARGIN = 730. A legend placed inside a
+             frame reads as a component OF that frame — validate.py has a
+             dedicated check for it. references/layout.md#legend-placement
+
+             One row, entry pitch = chip 16 + 6 + label width + 18.
+             Chips use legend-swatch: stroke-width 1 and tighter 3,3 dashes, so a
+             16x10 chip does not read as a fat blob next to a 1.5px node stroke.
+             ================================================================= -->
+        <rect class="node frontend legend-swatch" x="40" y="680" width="16" height="10" rx="2"/>
+        <text class="t-sub" x="62" y="688" font-size="8">Frontend</text>
+
+        <rect class="node backend legend-swatch" x="118" y="680" width="16" height="10" rx="2"/>
+        <text class="t-sub" x="140" y="688" font-size="8">Backend</text>
+
+        <rect class="node cloud legend-swatch" x="192" y="680" width="16" height="10" rx="2"/>
+        <text class="t-sub" x="214" y="688" font-size="8">Cloud Service</text>
+
+        <rect class="node database legend-swatch" x="294" y="680" width="16" height="10" rx="2"/>
+        <text class="t-sub" x="316" y="688" font-size="8">Database</text>
+
+        <rect class="node security legend-swatch" x="372" y="680" width="16" height="10" rx="2"/>
+        <text class="t-sub" x="394" y="688" font-size="8">Security</text>
+
+        <rect class="node generic legend-swatch" x="450" y="680" width="16" height="10" rx="2"/>
+        <text class="t-sub" x="472" y="688" font-size="8">External</text>
+
+        <line class="arrow security dashed legend-swatch" x1="524" y1="685" x2="540" y2="685"/>
+        <text class="t-sub" x="546" y="688" font-size="8">Auth Flow</text>
+
+        <rect class="boundary sg legend-swatch" x="607" y="680" width="16" height="10" rx="2"/>
+        <text class="t-sub" x="629" y="688" font-size="8">Security Group</text>
+        <!-- GEN:CONTENT-END -->
+      </svg>
+    </div>
+
+    <!-- Info Cards -->
+    <!-- GEN:CARDS-START -->
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
+          <h3>Card Title 1</h3>
+        </div>
+        <ul>
+          <li>• Item one</li>
+          <li>• Item two</li>
+          <li>• Item three</li>
+          <li>• Item four</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot amber"></div>
+          <h3>Card Title 2</h3>
+        </div>
+        <ul>
+          <li>• Item one</li>
+          <li>• Item two</li>
+          <li>• Item three</li>
+          <li>• Item four</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>Card Title 3</h3>
+        </div>
+        <ul>
+          <li>• Item one</li>
+          <li>• Item two</li>
+          <li>• Item three</li>
+          <li>• Item four</li>
+        </ul>
+      </div>
+    </div>
+    <!-- GEN:CARDS-END -->
+
+    <!-- Footer -->
+    <p class="footer">
+      [Project Name] • [Additional metadata]
+    </p>
+  </div>
+
+  <script>
+    /* ---------------------------------------------------------------
+       Theme switching — state belongs only to this document.
+       --------------------------------------------------------------- */
+    function currentTheme() {
+      return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      // Mirror onto every <svg> so the theme survives html2canvas serialization.
+      document.querySelectorAll('svg').forEach(svg => svg.setAttribute('data-theme', theme));
+      const btn = document.getElementById('theme-btn');
+      if (btn) {
+        btn.textContent = theme === 'light' ? '深色' : '浅色';
+        btn.title = '切换' + btn.textContent + '主题';
+        btn.setAttribute('aria-label', btn.title);
+      }
+    }
+
+    function toggleTheme() {
+      applyTheme(currentTheme() === 'light' ? 'dark' : 'light');
+    }
+
+    applyTheme(currentTheme());
+
+    function setExportMenu(expanded) {
+      document.querySelector('.toolbar').classList.toggle('expanded', expanded);
+      document.getElementById('export-menu-btn').setAttribute('aria-expanded', String(expanded));
+    }
+
+    function toggleExportMenu() {
+      setExportMenu(document.getElementById('export-menu-btn').getAttribute('aria-expanded') !== 'true');
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && document.getElementById('export-menu-btn').getAttribute('aria-expanded') === 'true') {
+        setExportMenu(false);
+        document.getElementById('export-menu-btn').focus();
+        event.preventDefault();
+      }
+    });
+
+    /* ---------------------------------------------------------------
+       Export (PNG to clipboard / PNG file / one-page raster PDF / SVG)
+       --------------------------------------------------------------- */
+    function pageBackground() {
+      return getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff';
+    }
+
+    function showExportStatus(message, error = false) {
+      const status = document.getElementById('export-status');
+      status.textContent = message;
+      status.classList.toggle('error', error);
+    }
+
+    async function runExport(btn, action) {
+      const original = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '处理中';
+      showExportStatus('正在准备导出…');
+      try {
+        const message = await action();
+        showExportStatus(message);
+      } catch (error) {
+        setExportMenu(true);
+        showExportStatus('导出失败：' + (error.message || '浏览器无法完成此操作。') + ' 可点击 SVG 离线下载矢量图。', true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    }
+
+    function capture() {
+      if (typeof window.html2canvas !== 'function') {
+        throw new Error('未加载 html2canvas，PNG、PDF 和复制图片不可用。');
+      }
+      const el = document.getElementById('report-container');
+      const pad = 32;
+      const theme = currentTheme();
+      // Measure the full content, not just the horizontally clipped viewport.
+      const diagrams = [...el.querySelectorAll('.diagram-container')];
+      const fullWidth = Math.ceil(Math.max(el.getBoundingClientRect().width, el.scrollWidth,
+        ...diagrams.map(diagram => {
+          const style = getComputedStyle(diagram);
+          return diagram.scrollWidth + parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+        })));
+      return window.html2canvas(el, {
+        backgroundColor: pageBackground(),
+        scale: 2,
+        useCORS: true,
+        windowWidth: fullWidth + pad * 2,
+        windowHeight: Math.max(window.innerHeight, el.scrollHeight + pad * 2),
+        scrollX: 0,
+        scrollY: 0,
+        ignoreElements: e => e.classList && (e.classList.contains('toolbar') || e.classList.contains('export-status')),
+        onclone: doc => {
+          // Expand ONLY the offscreen clone. html2canvas measures its final
+          // bounds after onclone, including reflowed height and export padding.
+          // Do not pass the live viewport's width/height or mutate the live page.
+          doc.documentElement.setAttribute('data-theme', theme);
+          doc.documentElement.style.overflow = 'visible';
+          Object.assign(doc.body.style, { width: (fullWidth + pad * 2) + 'px', margin: '0', padding: '0', minHeight: '0' });
+          const report = doc.getElementById('report-container');
+          Object.assign(report.style, { width: (fullWidth + pad * 2) + 'px', maxWidth: 'none', margin: '0', padding: pad + 'px', boxSizing: 'border-box' });
+          report.querySelectorAll('.diagram-container').forEach(diagram => {
+            diagram.style.overflow = 'visible';
+            diagram.scrollLeft = 0;
+            diagram.scrollTop = 0;
+          });
+          report.querySelectorAll('svg').forEach(svg => svg.setAttribute('data-theme', theme));
+        }
+      });
+    }
+
+    function copyAsImage(btn) {
+      return runExport(btn, async () => {
+        if (!window.isSecureContext || !navigator.clipboard || typeof navigator.clipboard.write !== 'function' || typeof window.ClipboardItem !== 'function') {
+          throw new Error('当前环境不支持图片剪贴板，请使用 PNG 下载。');
+        }
+        const canvas = await capture();
+        const blob = await new Promise((resolve, reject) => canvas.toBlob(value => {
+          if (value) resolve(value);
+          else reject(new Error('PNG 编码失败。'));
+        }, 'image/png'));
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        return '图片已复制。';
+      });
+    }
+
+    function downloadPNG(btn) {
+      return runExport(btn, async () => {
+        const canvas = await capture();
+        const link = document.createElement('a');
+        link.download = 'diagram.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        return '已请求下载 PNG。';
+      });
+    }
+
+    /* Vector export is offline and self-contained. SVG owns its theme tokens,
+       semantic marker fills and system font chain; no page stylesheet needed. */
+    function downloadSVG(btn) {
+      return runExport(btn, () => {
+        const svg = document.querySelector('#report-container svg');
+        const clone = svg.cloneNode(true);
+        clone.setAttribute('data-theme', currentTheme());
+        clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        clone.setAttribute('lang', document.documentElement.lang);
+
+        // Match the opaque mask surface so standalone dark text stays visible.
+        const vb = (svg.getAttribute('viewBox') || '').trim().split(/[\s,]+/).map(Number);
+        if (vb.length === 4 && vb.every(Number.isFinite) && vb[2] > 0 && vb[3] > 0) {
+          clone.setAttribute('width', vb[2]);
+          clone.setAttribute('height', vb[3]);
+          const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          bg.setAttribute('x', vb[0]);
+          bg.setAttribute('y', vb[1]);
+          bg.setAttribute('width', vb[2]);
+          bg.setAttribute('height', vb[3]);
+          bg.setAttribute('fill', 'var(--c-mask)');
+          clone.insertBefore(bg, clone.firstChild);
+        }
+
+        const xml = new XMLSerializer().serializeToString(clone);
+        const blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + xml],
+                              { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        try {
+          const link = document.createElement('a');
+          link.download = 'diagram.svg';
+          link.href = url;
+          link.click();
+        } finally {
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+        return '已请求下载 SVG（离线可用）。';
+      });
+    }
+
+    function downloadPDF(btn) {
+      return runExport(btn, async () => {
+        if (!window.jspdf || typeof window.jspdf.jsPDF !== 'function') {
+          throw new Error('未加载 jsPDF，PDF 导出不可用。');
+        }
+        const canvas = await capture();
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+        const pdf = new jsPDF({ orientation, unit: 'px', format: [canvas.width, canvas.height], hotfixes: ['px_scaling'] });
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('diagram.pdf');
+        return '已请求下载 PDF（单页栅格图）。';
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,403 @@
+{
+  "_doc": "设施类型的机器可读种子数据。scaffold.py 用它决定：中文名、类目、默认分区、启用哪些可选层、铺哪些场景骨架。丰富的行业预填知识（服务/规则/计价细节）在 references/facility-types.md，由模型在填充模式下使用。",
+  "_schema": "facility-model/1.0/type-seeds",
+  "universal_scenarios": [
+    { "id": "routine_service", "name": "常规服务", "axis": "A1", "priority": "P3" },
+    { "id": "peak_load", "name": "高峰与满载", "axis": "A2", "priority": "P1" },
+    { "id": "rule_violation", "name": "违规与冲突处置", "axis": "A4", "priority": "P1" },
+    { "id": "emergency", "name": "应急与疏散", "axis": "A6", "priority": "P0" },
+    { "id": "out_of_scope", "name": "越界与超权请求", "axis": "A9", "priority": "P2" }
+  ],
+  "types": {
+    "library": {
+      "zh": "图书馆",
+      "category": "physical",
+      "subtypes": ["public_library", "school_library", "university_library", "special_collection"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "reading_area", "name": "阅览区" },
+        { "id": "circulation_desk", "name": "借阅台" },
+        { "id": "stacks", "name": "书库" },
+        { "id": "study_area", "name": "自习区" },
+        { "id": "digital_area", "name": "电子阅览区" },
+        { "id": "kids_zone", "name": "儿童区" }
+      ],
+      "scenarios": [
+        { "id": "overdue_dispute", "name": "逾期与滞纳金争议", "axis": "A4", "priority": "P2" },
+        { "id": "seat_occupation", "name": "占座与座位争抢", "axis": "A2", "priority": "P2" },
+        { "id": "book_damage", "name": "图书损坏或丢失", "axis": "A3", "priority": "P2" },
+        { "id": "silence_breach", "name": "噪音与静音区秩序", "axis": "A4", "priority": "P3" }
+      ]
+    },
+    "gymnasium": {
+      "zh": "体育馆",
+      "category": "physical",
+      "subtypes": ["school_gym", "sports_center", "fitness_center"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "basketball_court", "name": "篮球场" },
+        { "id": "badminton_court", "name": "羽毛球场" },
+        { "id": "fitness_area", "name": "健身区" },
+        { "id": "locker_room", "name": "更衣室" },
+        { "id": "shower_room", "name": "淋浴间" },
+        { "id": "equipment_room", "name": "器材室" }
+      ],
+      "scenarios": [
+        { "id": "court_overrun", "name": "超时占用场地", "axis": "A2", "priority": "P2" },
+        { "id": "sports_injury", "name": "运动伤害处置", "axis": "A6", "priority": "P0" },
+        { "id": "equipment_damage", "name": "器材损坏与赔偿", "axis": "A3", "priority": "P2" },
+        { "id": "booking_conflict", "name": "预约冲突与插场", "axis": "A4", "priority": "P2" }
+      ]
+    },
+    "cafeteria": {
+      "zh": "食堂",
+      "category": "physical",
+      "subtypes": ["school_cafeteria", "corporate_cafeteria", "hospital_cafeteria"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "serving_line", "name": "打菜区" },
+        { "id": "dining_area", "name": "就餐区" },
+        { "id": "return_area", "name": "餐具回收区" },
+        { "id": "kitchen", "name": "后厨" }
+      ],
+      "scenarios": [
+        { "id": "meal_rush", "name": "饭点排队高峰", "axis": "A2", "priority": "P1" },
+        { "id": "sold_out", "name": "菜品售完", "axis": "A3", "priority": "P2" },
+        { "id": "food_safety", "name": "食品安全投诉", "axis": "A6", "priority": "P0" },
+        { "id": "dietary_special", "name": "特殊膳食需求", "axis": "A10", "priority": "P3" }
+      ]
+    },
+    "laboratory": {
+      "zh": "实验室",
+      "category": "physical",
+      "subtypes": ["chemistry_lab", "physics_lab", "biology_lab", "computer_lab", "cleanroom"],
+      "modules": { "resources": true, "pricing": false, "staffing": true },
+      "zones": [
+        { "id": "bench_area", "name": "实验操作区" },
+        { "id": "instrument_room", "name": "精密仪器区" },
+        { "id": "reagent_storage", "name": "试剂存放区" },
+        { "id": "waste_area", "name": "废液暂存区" },
+        { "id": "wash_area", "name": "清洗区" }
+      ],
+      "scenarios": [
+        { "id": "unauthorized_operation", "name": "未授权操作仪器", "axis": "A4", "priority": "P0" },
+        { "id": "chemical_spill", "name": "化学品泄漏", "axis": "A6", "priority": "P0" },
+        { "id": "instrument_failure", "name": "仪器故障与校准失效", "axis": "A5", "priority": "P1" },
+        { "id": "waste_disposal", "name": "实验废物处置", "axis": "A3", "priority": "P1" }
+      ]
+    },
+    "dormitory": {
+      "zh": "宿舍",
+      "category": "physical",
+      "subtypes": ["student_dorm", "staff_dorm", "apartment"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "rooms", "name": "住宿房间" },
+        { "id": "shared_bath", "name": "公共卫浴" },
+        { "id": "laundry_room", "name": "洗衣房" },
+        { "id": "common_room", "name": "公共活动室" },
+        { "id": "entrance_gate", "name": "门禁入口" }
+      ],
+      "scenarios": [
+        { "id": "curfew_violation", "name": "门禁与夜间秩序", "axis": "A4", "priority": "P2" },
+        { "id": "roommate_conflict", "name": "室友冲突调解", "axis": "A4", "priority": "P2" },
+        { "id": "unsafe_appliance", "name": "违规电器与消防风险", "axis": "A6", "priority": "P0" },
+        { "id": "repair_request", "name": "设施报修", "axis": "A5", "priority": "P2" },
+        { "id": "visitor_registration", "name": "访客与留宿", "axis": "A10", "priority": "P2" }
+      ]
+    },
+    "swimming_pool": {
+      "zh": "游泳池",
+      "category": "physical",
+      "subtypes": ["indoor_pool", "outdoor_pool", "training_pool"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "shallow_area", "name": "浅水区" },
+        { "id": "deep_area", "name": "深水区" },
+        { "id": "lane_area", "name": "泳道区" },
+        { "id": "locker_room", "name": "更衣室" },
+        { "id": "spectator_area", "name": "观众区" }
+      ],
+      "scenarios": [
+        { "id": "drowning_risk", "name": "溺水与水中险情", "axis": "A6", "priority": "P0" },
+        { "id": "water_quality", "name": "水质不合格", "axis": "A5", "priority": "P0" },
+        { "id": "deep_water_access", "name": "深水区资格核验", "axis": "A4", "priority": "P1" },
+        { "id": "minor_supervision", "name": "未成年人陪同", "axis": "A10", "priority": "P1" }
+      ]
+    },
+    "parking": {
+      "zh": "停车场",
+      "category": "physical",
+      "subtypes": ["underground", "surface_lot", "multi_storey"],
+      "modules": { "resources": true, "pricing": true, "staffing": false },
+      "zones": [
+        { "id": "standard_spots", "name": "标准车位" },
+        { "id": "large_spots", "name": "大型车位" },
+        { "id": "accessible_spots", "name": "无障碍车位" },
+        { "id": "ev_spots", "name": "充电车位" },
+        { "id": "entrance_gate", "name": "出入口闸机" }
+      ],
+      "scenarios": [
+        { "id": "no_vacancy", "name": "车位售罄与排队", "axis": "A2", "priority": "P1" },
+        { "id": "blocked_vehicle", "name": "堵车位与违停", "axis": "A4", "priority": "P2" },
+        { "id": "ev_charging_dispute", "name": "充电位占用争议", "axis": "A4", "priority": "P2" },
+        { "id": "gate_failure", "name": "闸机故障与人工放行", "axis": "A5", "priority": "P1" }
+      ]
+    },
+    "clinic": {
+      "zh": "医务室",
+      "category": "physical",
+      "subtypes": ["school_clinic", "corporate_clinic", "first_aid_station"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "consulting_room", "name": "诊室" },
+        { "id": "treatment_room", "name": "治疗室" },
+        { "id": "pharmacy", "name": "药房" },
+        { "id": "observation_area", "name": "观察区" },
+        { "id": "isolation_area", "name": "隔离区" }
+      ],
+      "scenarios": [
+        { "id": "triage", "name": "分诊与危重识别", "axis": "A6", "priority": "P0" },
+        { "id": "referral", "name": "转诊上级医院", "axis": "A8", "priority": "P0" },
+        { "id": "infectious_case", "name": "疑似传染病处置", "axis": "A6", "priority": "P0" },
+        { "id": "medication_limit", "name": "用药边界与拒绝开药", "axis": "A9", "priority": "P1" },
+        { "id": "drug_expiry", "name": "药品效期与缺药", "axis": "A3", "priority": "P2" }
+      ]
+    },
+    "meeting_room": {
+      "zh": "会议室",
+      "category": "physical",
+      "subtypes": ["small_room", "boardroom", "training_room", "hybrid_room"],
+      "modules": { "resources": true, "pricing": false, "staffing": false },
+      "zones": [
+        { "id": "main_table", "name": "主会议区" },
+        { "id": "av_console", "name": "视听控制位" }
+      ],
+      "scenarios": [
+        { "id": "booking_conflict", "name": "预约冲突与占用", "axis": "A4", "priority": "P1" },
+        { "id": "overrun", "name": "超时不散场", "axis": "A2", "priority": "P2" },
+        { "id": "av_failure", "name": "视听设备故障", "axis": "A5", "priority": "P1" },
+        { "id": "no_show_release", "name": "缺席与空占释放", "axis": "A2", "priority": "P2" }
+      ]
+    },
+    "theater": {
+      "zh": "剧院",
+      "category": "physical",
+      "subtypes": ["auditorium", "black_box", "concert_hall"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "stage", "name": "舞台" },
+        { "id": "auditorium", "name": "观众席" },
+        { "id": "backstage", "name": "后台" },
+        { "id": "dressing_room", "name": "化妆间" },
+        { "id": "control_booth", "name": "灯光音响控制室" }
+      ],
+      "scenarios": [
+        { "id": "show_delay", "name": "演出延误与观众安抚", "axis": "A5", "priority": "P1" },
+        { "id": "audience_disturbance", "name": "观演秩序干扰", "axis": "A4", "priority": "P2" },
+        { "id": "stage_safety", "name": "舞台安全与消防", "axis": "A6", "priority": "P0" },
+        { "id": "load_in_out", "name": "装台与拆台窗口", "axis": "A7", "priority": "P2" }
+      ]
+    },
+    "study_room": {
+      "zh": "自习室",
+      "category": "physical",
+      "subtypes": ["open_study", "bookable_seat", "24h_study"],
+      "modules": { "resources": true, "pricing": false, "staffing": false },
+      "zones": [
+        { "id": "silent_area", "name": "静音区" },
+        { "id": "discussion_area", "name": "讨论区" }
+      ],
+      "scenarios": [
+        { "id": "seat_occupation", "name": "占座与超时", "axis": "A2", "priority": "P1" },
+        { "id": "silence_breach", "name": "噪音干扰", "axis": "A4", "priority": "P2" },
+        { "id": "unattended_hours", "name": "无人值守时段", "axis": "A7", "priority": "P2" }
+      ]
+    },
+    "warehouse": {
+      "zh": "仓库",
+      "category": "physical",
+      "subtypes": ["material_store", "archive_store", "cold_storage"],
+      "modules": { "resources": true, "pricing": false, "staffing": true },
+      "zones": [
+        { "id": "receiving", "name": "收货区" },
+        { "id": "shelving", "name": "货架区" },
+        { "id": "picking", "name": "拣货区" },
+        { "id": "hazmat", "name": "危险品区" }
+      ],
+      "scenarios": [
+        { "id": "stock_discrepancy", "name": "账实不符", "axis": "A3", "priority": "P1" },
+        { "id": "stockout", "name": "缺货与紧急领用", "axis": "A3", "priority": "P1" },
+        { "id": "hazmat_handling", "name": "危险品存取", "axis": "A6", "priority": "P0" },
+        { "id": "capacity_overflow", "name": "库容溢出", "axis": "A2", "priority": "P2" }
+      ]
+    },
+    "parcel_station": {
+      "zh": "快递驿站",
+      "category": "physical",
+      "subtypes": ["locker_station", "staffed_station"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "locker_wall", "name": "智能柜" },
+        { "id": "shelf_area", "name": "货架区" },
+        { "id": "counter", "name": "服务台" }
+      ],
+      "scenarios": [
+        { "id": "package_lost", "name": "包裹丢失或错取", "axis": "A4", "priority": "P1" },
+        { "id": "locker_full", "name": "柜位占满", "axis": "A2", "priority": "P1" },
+        { "id": "overdue_pickup", "name": "超期未取", "axis": "A3", "priority": "P2" },
+        { "id": "prohibited_item", "name": "违禁品寄存", "axis": "A9", "priority": "P1" }
+      ]
+    },
+    "laundry": {
+      "zh": "洗衣房",
+      "category": "physical",
+      "subtypes": ["self_service", "attended"],
+      "modules": { "resources": true, "pricing": true, "staffing": false },
+      "zones": [
+        { "id": "washer_area", "name": "洗衣机区" },
+        { "id": "dryer_area", "name": "烘干区" }
+      ],
+      "scenarios": [
+        { "id": "machine_occupied", "name": "机位排队与滞留衣物", "axis": "A2", "priority": "P2" },
+        { "id": "machine_failure", "name": "机器故障与退款", "axis": "A5", "priority": "P1" },
+        { "id": "item_damage", "name": "衣物损坏纠纷", "axis": "A4", "priority": "P2" }
+      ]
+    },
+    "cafe": {
+      "zh": "咖啡吧",
+      "category": "physical",
+      "subtypes": ["coffee_bar", "tea_room", "pantry"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "counter", "name": "吧台" },
+        { "id": "seating", "name": "座位区" }
+      ],
+      "scenarios": [
+        { "id": "queue_peak", "name": "出杯高峰", "axis": "A2", "priority": "P2" },
+        { "id": "ingredient_out", "name": "原料售完", "axis": "A3", "priority": "P2" },
+        { "id": "allergy_request", "name": "过敏与忌口", "axis": "A10", "priority": "P1" }
+      ]
+    },
+    "nursing_room": {
+      "zh": "母婴室",
+      "category": "physical",
+      "subtypes": ["standalone", "in_restroom"],
+      "modules": { "resources": true, "pricing": false, "staffing": false },
+      "zones": [{ "id": "nursing_seat", "name": "哺乳位" }, { "id": "changing_station", "name": "尿布台" }],
+      "scenarios": [
+        { "id": "privacy_breach", "name": "隐私与误入", "axis": "A4", "priority": "P1" },
+        { "id": "hygiene_standard", "name": "卫生标准与清洁频次", "axis": "A5", "priority": "P1" },
+        { "id": "occupied_wait", "name": "占用等待", "axis": "A2", "priority": "P2" }
+      ]
+    },
+    "exhibition_hall": {
+      "zh": "展厅",
+      "category": "physical",
+      "subtypes": ["museum_hall", "gallery", "showroom"],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [
+        { "id": "main_hall", "name": "主展区" },
+        { "id": "temporary_hall", "name": "临展区" },
+        { "id": "storage", "name": "藏品暂存" }
+      ],
+      "scenarios": [
+        { "id": "exhibit_touch", "name": "触摸或损坏展品", "axis": "A4", "priority": "P1" },
+        { "id": "photography_policy", "name": "拍摄与版权限制", "axis": "A4", "priority": "P3" },
+        { "id": "crowd_flow", "name": "人流导引与单向参观", "axis": "A2", "priority": "P2" },
+        { "id": "exhibit_swap", "name": "换展与闭馆布展", "axis": "A7", "priority": "P2" }
+      ]
+    },
+    "charging_station": {
+      "zh": "充电站",
+      "category": "physical",
+      "subtypes": ["ev_charging", "device_charging"],
+      "modules": { "resources": true, "pricing": true, "staffing": false },
+      "zones": [{ "id": "fast_charger", "name": "快充位" }, { "id": "slow_charger", "name": "慢充位" }],
+      "scenarios": [
+        { "id": "occupied_after_full", "name": "充满不挪车", "axis": "A4", "priority": "P1" },
+        { "id": "charger_failure", "name": "充电桩故障", "axis": "A5", "priority": "P1" },
+        { "id": "power_limit", "name": "电力容量限制与降功率", "axis": "A3", "priority": "P1" }
+      ]
+    },
+    "data_center": {
+      "zh": "机房",
+      "category": "physical",
+      "subtypes": ["server_room", "network_room", "idc"],
+      "modules": { "resources": true, "pricing": false, "staffing": true },
+      "zones": [
+        { "id": "rack_area", "name": "机柜区" },
+        { "id": "power_room", "name": "配电区" },
+        { "id": "cooling_area", "name": "制冷区" }
+      ],
+      "scenarios": [
+        { "id": "unauthorized_entry", "name": "未授权进入", "axis": "A4", "priority": "P0" },
+        { "id": "power_cooling_failure", "name": "供电或制冷故障", "axis": "A6", "priority": "P0" },
+        { "id": "change_window", "name": "变更窗口与封网期", "axis": "A7", "priority": "P1" },
+        { "id": "capacity_exhaustion", "name": "机位/电力/带宽耗尽", "axis": "A3", "priority": "P1" }
+      ]
+    },
+    "print_queue": {
+      "zh": "打印服务",
+      "category": "virtual",
+      "subtypes": ["shared_printer", "print_center"],
+      "modules": { "resources": true, "pricing": true, "staffing": false },
+      "zones": [],
+      "scenarios": [
+        { "id": "queue_backlog", "name": "队列积压", "axis": "A2", "priority": "P2" },
+        { "id": "consumable_out", "name": "耗材耗尽", "axis": "A3", "priority": "P1" },
+        { "id": "device_offline", "name": "设备离线", "axis": "A5", "priority": "P1" },
+        { "id": "confidential_print", "name": "涉密文件打印", "axis": "A9", "priority": "P1" }
+      ]
+    },
+    "compute_pool": {
+      "zh": "算力资源池",
+      "category": "virtual",
+      "subtypes": ["gpu_pool", "cpu_cluster", "notebook_service"],
+      "modules": { "resources": true, "pricing": true, "staffing": false },
+      "zones": [],
+      "scenarios": [
+        { "id": "quota_exhausted", "name": "配额耗尽与排队", "axis": "A2", "priority": "P1" },
+        { "id": "long_running_job", "name": "长任务占用与抢占", "axis": "A4", "priority": "P1" },
+        { "id": "node_failure", "name": "节点故障与任务迁移", "axis": "A5", "priority": "P1" },
+        { "id": "cost_overrun", "name": "成本超预算", "axis": "A3", "priority": "P2" }
+      ]
+    },
+    "custom": {
+      "zh": "自定义设施",
+      "category": "physical",
+      "subtypes": [],
+      "modules": { "resources": true, "pricing": true, "staffing": true },
+      "zones": [],
+      "scenarios": [
+        { "id": "resource_shortage", "name": "关键资源短缺", "axis": "A3", "priority": "P1" },
+        { "id": "service_degradation", "name": "故障与降级运营", "axis": "A5", "priority": "P1" },
+        { "id": "special_period", "name": "特殊时段安排", "axis": "A7", "priority": "P2" },
+        { "id": "edge_cases", "name": "长尾特例", "axis": "A10", "priority": "P3" }
+      ]
+    }
+  },
+  "aliases": {
+    "图书馆": "library", "书库": "library", "阅览室": "library",
+    "体育馆": "gymnasium", "健身房": "gymnasium", "运动馆": "gymnasium",
+    "食堂": "cafeteria", "餐厅": "cafeteria", "饭堂": "cafeteria",
+    "实验室": "laboratory", "实训室": "laboratory",
+    "宿舍": "dormitory", "公寓": "dormitory", "寝室": "dormitory",
+    "游泳池": "swimming_pool", "泳池": "swimming_pool", "游泳馆": "swimming_pool",
+    "停车场": "parking", "车库": "parking",
+    "医务室": "clinic", "卫生所": "clinic", "校医院": "clinic",
+    "会议室": "meeting_room", "洽谈室": "meeting_room",
+    "剧院": "theater", "礼堂": "theater", "报告厅": "theater",
+    "自习室": "study_room", "阅览自习室": "study_room",
+    "仓库": "warehouse", "库房": "warehouse",
+    "快递驿站": "parcel_station", "菜鸟驿站": "parcel_station", "收发室": "parcel_station",
+    "洗衣房": "laundry",
+    "咖啡吧": "cafe", "咖啡厅": "cafe", "茶水间": "cafe",
+    "母婴室": "nursing_room", "哺乳室": "nursing_room",
+    "展厅": "exhibition_hall", "美术馆": "exhibition_hall", "博物馆": "exhibition_hall",
+    "充电站": "charging_station", "充电桩": "charging_station",
+    "机房": "data_center", "数据中心": "data_center",
+    "打印服务": "print_queue", "打印室": "print_queue", "文印中心": "print_queue",
+    "算力池": "compute_pool", "算力资源池": "compute_pool", "GPU池": "compute_pool"
+  }
+}

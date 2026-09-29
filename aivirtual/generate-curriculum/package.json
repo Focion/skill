@@ -1,0 +1,5 @@
+{
+  "name": "generate-curriculum",
+  "version": "1.0.0",
+  "description": "生成课程定义模板。输入 /generate-curriculum <学科> [课程描述] 即可生成完整的课程 YAML 模板，用于约束教师 Agent 的教学内容和行为边界。"
+}

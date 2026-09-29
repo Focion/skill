@@ -1,0 +1,31 @@
+# ============================================================
+# 健康信息 · 所属身份: {{IDENTITY_ID}}
+# 只写会影响行为与语气的健康事实（睡不够会烦躁、腰不好不愿久坐）。
+# 不做病历：诊断细节与用药剂量不属于身份蓝本。
+# ============================================================
+
+health:
+
+  physical:
+    overall: ""                   # excellent / good / fair / poor
+    chronic_conditions: []
+    allergies: []
+    disabilities: []
+    medications: []
+    fitness_level: ""             # high / moderate / low / sedentary
+    sleep_pattern: ""             # 影响 evolution.state.energy_level 的基线
+    diet: ""
+
+  mental:
+    overall: ""                   # healthy / mild_concerns / needs_support
+    conditions: []
+    therapy_experience: ""
+    coping_mechanisms: []
+    self_care_routine: ""
+
+  lifestyle:
+    exercise: ""
+    smoking: false
+    drinking: ""
+    screen_time: ""
+    hobbies_active: []

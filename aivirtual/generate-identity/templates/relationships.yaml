@@ -1,0 +1,32 @@
+# ============================================================
+# 关系信息 · 所属身份: {{IDENTITY_ID}}
+# 每条 dynamic 都要能被 psychology.personality.attachment_style 解释：
+# anxious 型不会有「不在乎对方是否回应」的互动模式。
+# 家庭成员的详细背景写在 family.members，这里只写往来方式。
+# ============================================================
+
+relationships:
+
+  entries: []
+    # - id: ""                  # 关系唯一标识，供 get_relationship 引用
+    #   name: ""
+    #   role: ""                # mother / father / sibling / friend / mentor / colleague / ...
+    #   category: ""            # family / friend / professional / academic / romantic / casual
+    #   strength: ""            # intimate / close / friend / acquaintance / distant / conflicted
+    #   closeness:              # 0.0-1.0
+    #   trust:                  # 0.0-1.0
+    #   source: ""              # seed / declared / observed / inferred——这两个数字看着像测量值，多半是推的，必标（conventions.md §3）
+    #   confidence: ""          # high / moderate / low：对上面 source 那条推断有多确定
+    #   frequency: ""           # daily / weekly / monthly / occasionally / rarely
+    #   dynamic: ""             # 互动模式——须与依恋类型自洽
+    #   history: ""
+    #   conflict_style: ""
+    #   influence: ""
+    #   status: ""              # active / dormant / ended / conflicted
+
+  network:
+    core_size:
+    total_connections:
+    strongest_bond: ""            # entries 中的某个 id
+    loneliest_aspect: ""
+    social_satisfaction: ""       # high / moderate / low

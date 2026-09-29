@@ -1,0 +1,225 @@
+# ============================================================
+# 身份索引（机器可读）—— 唯一一份「文件契约」
+# 新增文件必须在此登记，否则 validate.py 报 orphan，运行时永远读不到。
+# 冷启动 6 文件（本文件 + priority: cold_start 的 5 个）每轮都进 system prompt。
+# ============================================================
+
+meta:
+  identity_id: "{{IDENTITY_ID}}"     # id-<YYYYMMDD>-<role>-<拼音首字母>
+  display_name: "{{DISPLAY_NAME}}"
+  schema: identity-model/{{SCHEMA_VERSION}}
+  version: "2.0.0"
+  template_type: "{{ROLE}}"
+  extends: "{{EXTENDS}}"
+  author: ""
+  created_at: "{{DATE}}"
+  updated_at: "{{DATE}}"
+  generated_mode: "{{MODE}}"         # seed / filled
+  purpose: ""                        # @fill(human) 创建意图
+  valid_scenes: []                   # 适用场景；属于某组织时关联其准则模板 ID
+  tags: []
+
+files:
+  - path: "personal.yaml"
+    description: "姓名、年龄、籍贯、语言"
+    load_trigger:
+      keywords: []
+      context: "冷启动常驻：开口即需自称"
+      priority: "cold_start"
+    initial_state: "filled"
+    writable: false
+    format: "yaml"
+
+  - path: "constraints.yaml"
+    description: "安全与角色边界"
+    load_trigger:
+      keywords: []
+      context: "冷启动常驻：约束不可跳过"
+      priority: "cold_start"
+    initial_state: "filled"
+    writable: false
+    format: "yaml"
+
+  - path: "evolution.yaml"
+    description: "当前情绪、精力、信任度与演化规则"
+    load_trigger:
+      keywords: []
+      context: "冷启动常驻：对话中持续回写"
+      priority: "cold_start"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+  - path: "narrative_voice.yaml"
+    description: "语言指纹与叙事声音"
+    load_trigger:
+      keywords: []
+      context: "冷启动常驻：每句话的声音质感"
+      priority: "cold_start"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+  - path: "agent_protocol.yaml"
+    description: "其他 Agent 的查询/操作/事件接口"
+    load_trigger:
+      keywords: []
+      context: "冷启动常驻：协议须随时可用"
+      priority: "cold_start"
+    initial_state: "filled"
+    writable: false
+    format: "yaml"
+
+  - path: "psychology.yaml"
+    description: "MBTI、大五、情绪、认知、价值观"
+    load_trigger:
+      keywords: ["性格", "MBTI", "价值观", "情绪", "怎么看"]
+      context: "问及性格、心理反应或价值判断"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: false
+    format: "yaml"
+
+  - path: "health.yaml"
+    description: "身体、心理、作息"
+    load_trigger:
+      keywords: ["健康", "身体", "生病", "睡眠", "累"]
+      context: "问及健康、体力或生活习惯"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+  - path: "academic.yaml"
+    description: "学历、学校、专业、成绩"
+    load_trigger:
+      keywords: ["学校", "学历", "专业", "成绩", "年级"]
+      context: "问及教育背景或在校状态"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: false
+    format: "yaml"
+
+  - path: "skills.yaml"
+    description: "硬技能、软技能、短板"
+    load_trigger:
+      keywords: ["擅长", "技能", "会什么", "能做什么"]
+      context: "问及能力范围或专业领域"
+      priority: "on_demand"
+    initial_state: "empty"
+    writable: true
+    format: "yaml"
+    note: 授权期留空；由交互揭示后回写
+
+  - path: "social.yaml"
+    description: "社会地位、社交圈、网络形象"
+    load_trigger:
+      keywords: ["社交", "圈子", "阶层", "人脉"]
+      context: "问及社会位置或社群参与"
+      priority: "on_demand"
+    initial_state: "empty"
+    writable: true
+    format: "yaml"
+    note: 授权期留空；由交互揭示后回写
+
+  - path: "relationships.yaml"
+    description: "亲友、同事、师生等关系条目"
+    load_trigger:
+      keywords: ["朋友", "同事", "关系", "谁是"]
+      context: "问及具体人际关系"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+  - path: "family.yaml"
+    description: "家庭结构、成员、经济状况"
+    load_trigger:
+      keywords: ["家庭", "父母", "家里", "家境"]
+      context: "问及家庭情况或成长背景"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: false
+    format: "yaml"
+
+  - path: "specialties.yaml"
+    description: "天赋、兴趣、潜能"
+    load_trigger:
+      keywords: ["特长", "天赋", "爱好", "兴趣"]
+      context: "问及才艺或投入很深的兴趣"
+      priority: "on_demand"
+    initial_state: "empty"
+    writable: true
+    format: "yaml"
+    note: 授权期留空；由交互揭示后回写
+
+  - path: "behavior.yaml"
+    description: "语气、交互模式、习惯、应对"
+    load_trigger:
+      keywords: ["说话", "语气", "习惯", "风格"]
+      context: "需要对齐行为一致性时"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+  - path: "goals.yaml"
+    description: "四档目标、动机、恐惧"
+    load_trigger:
+      keywords: ["目标", "梦想", "未来", "怕", "打算"]
+      context: "问及目标、动机或恐惧"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+  - path: "knowledge_boundaries.yaml"
+    description: "已知域、盲区、误区、待学"
+    load_trigger:
+      keywords: ["你知道吗", "确定吗", "真的吗", "听说过"]
+      context: "知识被质疑或问及是否了解某事"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+  - path: "shadow.yaml"
+    description: "创伤、压抑需求、核心矛盾"
+    load_trigger:
+      keywords: ["为什么你", "你怕", "你后悔", "你嫉妒"]
+      context: "触及深层心理或自我矛盾"
+      priority: "on_demand"
+    initial_state: "empty"
+    writable: true
+    format: "yaml"
+    note: 授权期留空；深层心理只能由交互揭示
+
+  - path: "scene_presets.yaml"
+    description: "场景切换时的行为覆盖"
+    load_trigger:
+      keywords: ["课堂", "家里", "聚会", "独处", "换个场合"]
+      context: "对话场景显著切换"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+  - path: "daily_rhythm.yaml"
+    description: "时间上下文、日程、当前活动"
+    load_trigger:
+      keywords: ["几点", "星期几", "在做什么", "在哪"]
+      context: "问及时间、地点或此刻状态"
+      priority: "on_demand"
+    initial_state: "filled"
+    writable: true
+    format: "yaml"
+
+# ---- 全局约定 ----
+conventions:
+  fill_marker: "@fill(who) 说明"      # who 必写，三档分工见 conventions.md §2
+  empty_scalar: '""'
+  empty_list: "[]"
+  source_enum: [seed, declared, observed, inferred]   # source 一名只表溯源等级
+  timestamp_format: "ISO-8601 带时区"
+  id_style: snake_case
+  optional_unregistered: [model_defaults.yaml, provenance.yaml]   # 按设计不进 files

@@ -1,0 +1,46 @@
+# ============================================================
+# 来源留痕 · 所属身份: {{IDENTITY_ID}}
+# 可选文件，按设计不进 manifest.files（运行期不加载，只供人与校验复核）。
+# 存在的理由：S10「描述逐条有落点」和 S11「没有编造」这两条无法由蓝本自身判断，
+# 必须留下原始描述与分配清单才能对账。
+# ============================================================
+
+provenance:
+  generated_at: "{{DATE}}"
+  generated_mode: "{{MODE}}"
+  role: "{{ROLE}}"
+
+  # 用户原话，逐字保留，不要改写
+  raw_description: ""
+
+  # 描述的每一条 → 落到哪个文件的哪个字段
+  allocation: []
+    # - excerpt: ""             # 描述中的原文片段
+    #   file: ""               # 落点文件
+    #   field: ""              # 落点字段的 dotted path
+    #   value: ""              # 写进去的值
+    #   transform: ""          # 直填 / 推断（说明推断链）
+
+  # 描述里提到但没能落地的部分——留着比悄悄丢掉好
+  unallocated: []
+    # - excerpt: ""
+    #   why: ""                # 模板无对应字段 / 信息不足 / 与其他描述冲突
+
+  # 生成器按角色类型注入的行业默认值，标 source: seed，需人工确认后去标
+  seeds: []
+    # - field: ""
+    #   value: ""
+    #   basis: ""              # 依据（roles.json 的哪条默认）
+
+  # 描述里没有、也不是角色种子，纯由生成器补出来的具体值（姓名、生日、校名、数值）
+  # 与 unallocated 分开：那栏是「描述里有却没落地」，这栏是「描述里没有却写进去了」，混写会盖掉 S11 真正要查的东西
+  needs_review: []
+    # - field: ""
+    #   value: ""
+    #   why_invented: ""       # 为什么非填不可（如 identity_id 需要、字段是必填）
+
+  # 人工确认记录
+  confirmations: []
+    # - field: ""
+    #   confirmed_by: ""
+    #   confirmed_at: ""

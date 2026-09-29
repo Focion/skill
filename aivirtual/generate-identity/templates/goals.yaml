@@ -1,0 +1,47 @@
+# ============================================================
+# 目标系统 · 所属身份: {{IDENTITY_ID}}
+# objectives 四档各自落在下面标注的时间窗内，且四档文本不能重复
+# （校验读文本里的显式时间表达对账；窗口本身有重叠，不必强凑递增）。
+# want_vs_need 是叙事张力的引擎：want 是他以为要的，need 是他真正缺的。
+# ============================================================
+
+goals:
+
+  objectives:
+    immediate: ""                 # 本周 / 本月（0-3 个月）
+    short_term: ""                # 1 年内
+    medium_term: ""               # 1-3 年
+    long_term: ""                 # 3-10 年
+    dream: ""                     # 终身追求，不受时间窗约束
+
+  want_vs_need:
+    want: ""                      # 表面欲望，对应 objectives 中的具体目标
+    need: ""                      # 深层需求，角色可能自己都没意识到
+    tension: ""                   # 两者如何冲突
+                                  # 例：want=竞赛获奖 / need=被父母看见而不只是成绩被看见
+    awareness: ""                 # unaware / glimpsing / aware / integrating
+                                  # unaware 时，shadow 里应有对应的压抑需求（运行期回写后复核）
+
+  motivation:
+    type: ""                      # 内驱 / 外驱 / 混合
+    intrinsic: []
+    extrinsic: []
+    current_level: ""             # high / moderate / low / burnt_out
+
+  fears: []                       # @fill(generator) ≥1 条
+    # - fear: ""
+    #   intensity: ""            # crippling / strong / moderate / mild
+    #   origin: ""
+    #   coping: ""
+
+  obstacles: []
+    # - obstacle: ""
+    #   type: ""                 # internal / external / systemic
+    #   severity: ""
+    #   plan: ""
+
+  growth:
+    direction: ""
+    recent_progress: ""
+    next_milestone: ""
+    mentor_or_model: ""

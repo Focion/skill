@@ -1,0 +1,46 @@
+# ============================================================
+# 阴影 / 心理深度 · 所属身份: {{IDENTITY_ID}}
+# ★ 按设计留空。荣格意义上的阴影——被压抑、被否认、不愿面对的自我面向。
+#   它只能从对话里长出来：授权期预设一段创伤，等于让角色一开口就在表演创伤。
+# 运行期回写后，需回头复核 goals.want_vs_need.awareness 与 psychology.values.dealbreakers。
+# ============================================================
+
+shadow:
+
+  repressed_needs: []
+    # - need: ""
+    #   why_repressed: ""
+    #   leakage: ""             # 这需求怎么偷偷流露出来
+    #   trigger: ""             # 什么情况下会爆发
+
+  denied_traits: []
+    # - trait: ""
+    #   self_perception: ""     # 角色如何对自己解释
+    #   reality: ""
+    #   others_see: ""
+
+  unhealed_wounds: []
+    # - event: ""
+    #   age_at_time:
+    #   current_impact: ""
+    #   defense_mechanism: ""   # denial / rationalization / projection / displacement / ...
+    #   healing_progress: ""    # unaddressed / aware / processing / healing
+
+  core_conflicts: []
+    # - conflict: ""            # 如「渴望被认可 vs 害怕被关注」
+    #   manifestation: ""
+    #   resolution_status: ""   # unresolved / oscillating / reconciling / resolved
+
+  envy:
+    targets: []
+      # - target: ""
+      #   reason: ""
+      #   awareness: ""         # aware / semi_aware / unaware
+      #   coping: ""            # 转化为动力 / 贬低对方 / 回避 / 承认并处理
+
+  shame:
+    sources: []
+      # - origin: ""            # 羞耻的来源事件或评价；不叫 source，那个名留给溯源等级
+      #   intensity: ""         # crippling / strong / moderate / mild
+      #   triggers: []
+      #   response: ""          # hide / deflect / self_attack / attack_others

@@ -1,0 +1,31 @@
+# ============================================================
+# 社会信息 · 所属身份: {{IDENTITY_ID}}
+# ★ 按设计留空。社交圈是关系的聚合结果，只能从 relationships 的实际往来里长出来，
+#   授权期硬编一个「人脉广」会和后续每一次具体交往对不上。
+# ============================================================
+
+social:
+
+  status:
+    class: ""                     # upper / upper_middle / middle / lower_middle / working
+    occupational_prestige: ""
+    social_mobility: ""           # upward / stable / downward
+
+  circles: []
+    # - name: ""
+    #   type: ""                 # professional / hobby / neighborhood / online / family
+    #   size:
+    #   role: ""
+    #   closeness: ""            # core / close / acquaintance / peripheral
+
+  community:
+    involvement: ""               # active / occasional / passive / none
+    roles: []
+    volunteer:                    # true / false
+
+  online_presence:
+    platforms: []
+    activity_level: ""            # high / moderate / low / none
+    persona: ""                   # 真实 / 精心策划 / 匿名 / 潜水
+    following_count:
+    follower_count:

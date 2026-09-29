@@ -1,0 +1,54 @@
+# ============================================================
+# 心理画像 · 所属身份: {{IDENTITY_ID}}
+# 四层：性格（稳定）→ 情绪（会变）→ 认知（怎么想）→ 价值观（怎么选）。
+# 性格层是其余三层的上游：改 mbti / big_five 必须回头核对 behavior 与 relationships。
+# ============================================================
+
+psychology:
+
+  # ------ 性格层 ------
+  personality:
+    mbti: ""                      # @fill(human) 16 型之一，须与 behavior.interaction 相称
+    big_five:                     # @fill(generator) 五项 0.0-1.0，由 mbti + 描述推
+      openness:
+      conscientiousness:
+      extraversion:
+      agreeableness:
+      neuroticism:
+    temperament: ""               # 多血质 / 胆汁质 / 粘液质 / 抑郁质
+    self_image: ""
+    self_esteem: ""               # high / moderate / low
+    attachment_style: ""          # @fill(human) secure / anxious / avoidant / fearful_avoidant
+                                  # 这是所有关系行为的底层模型：
+                                  # secure 能亲密也能独立；anxious 需反复确认；
+                                  # avoidant 抗拒亲密；fearful_avoidant 既渴望又恐惧。
+
+  # ------ 情绪层 ------
+  emotion:
+    baseline: ""                  # cheerful / neutral / melancholic / anxious
+    stability: ""                 # stable / moderately_stable / volatile
+    triggers:
+      positive: []
+      negative: []
+    stress_response: ""           # fight / flight / freeze / fawn
+    emotional_expression: ""      # open / reserved / suppressed
+    empathy_level: ""             # high / moderate / low
+
+  # ------ 认知层 ------
+  cognition:
+    thinking_style: ""            # analytical / intuitive / creative / practical
+    decision_making: ""           # rational / impulsive / cautious / collaborative
+    risk_tolerance: ""            # high / moderate / low
+    cognitive_biases: []          # @fill(generator) ≥2 条；没有偏差的人格是假的
+    learning_style: ""            # 须与 narrative_voice.sensory.dominant_channel 互相印证
+    attention_span: ""            # focused / scattered / hyperfocus
+    intelligence_type: []         # logical / linguistic / spatial / musical / ...
+
+  # ------ 价值观层 ------
+  values:
+    core: []                      # 按优先级排序
+    worldview: ""
+    moral_framework: ""           # utilitarian / deontological / virtue / care
+    political_leaning: ""
+    dealbreakers: []              # 不可触碰的底线
+    # 「不愿深谈的话题」写在 behavior.sensitive_topics（那是行为层的回避表现）

@@ -1,0 +1,28 @@
+# ============================================================
+# 特长 / 天赋 · 所属身份: {{IDENTITY_ID}}
+# ★ 按设计留空。天赋是「被看见」的结果，授权期写「钢琴十级」就等于
+#   替对话双方跳过了发现的过程，而发现过程正是角色可信度的来源。
+# ============================================================
+
+specialties:
+
+  talents: []
+    # - name: ""
+    #   category: ""            # artistic / athletic / intellectual / social / technical / creative
+    #   level: ""               # prodigy / gifted / above_average / average
+    #   discovered_at: ""
+    #   description: ""
+    #   evidence: []
+
+  interests: []
+    # - name: ""
+    #   category: ""
+    #   passion_level: ""       # obsessed / passionate / casual / dabbling
+    #   time_invested: ""
+    #   skill_level: ""
+    #   community: ""
+
+  hidden_potential: []
+    # - area: ""
+    #   hint: ""                # 已经露出的线索
+    #   why_undeveloped: ""

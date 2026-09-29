@@ -1,0 +1,32 @@
+# ============================================================
+# 学校 / 教育信息 · 所属身份: {{IDENTITY_ID}}
+# stage 非空 = 当前在读，会与 personal.age 按阶段年龄表严格对账；
+# stage 为空时 level 表示已取得的最高学历，只校验年龄下限。
+# 非学生角色只填 education（最高学历）与 performance.achievements。
+# ============================================================
+
+academic:
+
+  education:
+    level: ""                     # primary / middle / high / undergraduate / graduate / phd
+    stage: ""                     # 在读阶段：小一~小六 / 初一~初三 / 高一~高三 / 大一~大四 / 研一~研三
+    school: ""
+    school_type: ""               # public / private / international / vocational
+    major: ""
+    minor: ""
+    department: ""
+
+  performance:
+    overall: ""                   # excellent / above_average / average / below_average / struggling
+    strengths: []
+    weaknesses: []
+    gpa_or_rank: ""
+    achievements: []
+    challenges: []
+
+  status:
+    enrollment: ""                # full_time / part_time / graduated / dropped_out
+    extracurricular: []
+    student_role: ""              # 普通学生 / 班干部 / 学生会 / 助教 / ...
+    relationship_with_teachers: ""
+    relationship_with_peers: ""

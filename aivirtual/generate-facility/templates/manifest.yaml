@@ -1,0 +1,249 @@
+# ============================================================
+# 文件清单（机器可读）
+# 作用：让 Agent / 校验脚本 / 加载器知道有哪些文件、什么格式、哪层、能不能写。
+# 这是唯一一份「文件契约」，新增文件必须同步登记，否则 validate.py 报 orphan。
+# ============================================================
+
+_meta:
+  file: manifest.yaml
+  schema: facility-model/{{SCHEMA_VERSION}}
+  facility_id: "{{FACILITY_ID}}"
+  facility_type: "{{FACILITY_TYPE}}"
+  generated_at: "{{DATE}}"
+  generated_mode: "{{MODE}}"           # seed（空白骨架） / filled（含描述填充）
+  writable_by: [human, generator]
+  update_mode: rewrite
+
+# ---- 加载层级定义 ----
+# budget_tokens 的口径：L0 为该层总量上限；L1/L2 为单文件上限（因为一次只加载少数几个）。
+# 骨架阶段的 token 主要来自注释；填充完成后如需压缩，可删注释保留结构。
+tiers:
+  L0: { name: 常驻,     budget_tokens: 1800, scope: total,    policy: "始终在上下文中" }
+  L1: { name: 高频按需, budget_tokens: 2500, scope: per_file, policy: "按路由表命中即加载，单任务 1-3 个" }
+  L2: { name: 深读,     budget_tokens: 4000, scope: per_file, policy: "确认落入该主题后再加载" }
+  L3: { name: 归档,     budget_tokens: null, scope: per_file, policy: "仅复盘/统计时按窗口切片加载" }
+
+# ---- 文件登记 ----
+# writable_by: human | generator | agent
+# update_mode: rewrite（整体覆写） | patch（局部修改） | append（仅追加，禁改历史）
+# required: false 表示该设施类型可缺省
+files:
+  - path: MODEL.md
+    tier: L0
+    format: markdown
+    purpose: 入口路由 + 设施概述 + 硬约束速查
+    writable_by: [human, generator, agent]
+    update_mode: patch
+    required: true
+
+  - path: manifest.yaml
+    tier: L1
+    format: yaml
+    purpose: 文件契约
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  - path: CHANGELOG.md
+    tier: L3
+    format: markdown
+    purpose: 模型演化留痕
+    writable_by: [human, generator, agent]
+    update_mode: append
+    required: true
+
+  # ---------- profile：设计态 ----------
+  - path: profile/basic.yaml
+    tier: L1
+    format: yaml
+    layer: 基本信息
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  - path: profile/time.yaml
+    tier: L1
+    format: yaml
+    layer: 时间信息
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  - path: profile/capacity.yaml
+    tier: L1
+    format: yaml
+    layer: 容量信息
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  - path: profile/usage.yaml
+    tier: L2
+    format: yaml
+    layer: 使用信息
+    writable_by: [human, generator, agent]
+    update_mode: patch
+    required: true
+    note: 首次生成为空；Agent 只能补充观测事实，不得修改限额类字段
+
+  - path: profile/services.yaml
+    tier: L1
+    format: yaml
+    layer: 服务能力
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  - path: profile/rules.yaml
+    tier: L1
+    format: yaml
+    layer: 规则约束
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  - path: profile/resources.yaml
+    tier: L1
+    format: yaml
+    layer: 资源库存
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: false
+
+  - path: profile/pricing.yaml
+    tier: L2
+    format: yaml
+    layer: 计费经济
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: false
+
+  - path: profile/staffing.yaml
+    tier: L2
+    format: yaml
+    layer: 人员角色
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: false
+
+  - path: profile/relations.yaml
+    tier: L2
+    format: yaml
+    layer: 关联拓扑
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  - path: profile/protocol.yaml
+    tier: L1
+    format: yaml
+    layer: 交互协议
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  # ---------- state：运行态 ----------
+  - path: state/live.json
+    tier: L1
+    format: json
+    layer: 实时状态
+    writable_by: [agent]
+    update_mode: rewrite
+    required: true
+    note: 覆写前先读并保留未识别字段；用 revision 做乐观锁
+
+  - path: state/usage.jsonl
+    tier: L3
+    format: jsonl
+    layer: 使用信息（流水）
+    writable_by: [agent]
+    update_mode: append
+    required: true
+    read_policy: 只读尾部窗口或用 digest
+
+  - path: state/usage-digest.json
+    tier: L2
+    format: json
+    layer: 使用信息（聚合）
+    writable_by: [agent]
+    update_mode: rewrite
+    required: true
+    note: 由 usage.jsonl 周期性汇总，是 L2 里唯一该读的使用数据
+
+  - path: state/incidents.jsonl
+    tier: L2
+    format: jsonl
+    layer: 事件与违规
+    writable_by: [agent]
+    update_mode: append
+    required: true
+
+  - path: state/maintenance.jsonl
+    tier: L3
+    format: jsonl
+    layer: 维护与损耗
+    writable_by: [agent]
+    update_mode: append
+    required: false
+
+  # ---------- memory ----------
+  - path: memory/POLICY.md
+    tier: L1
+    format: markdown
+    layer: 记忆策略
+    writable_by: [human, generator]
+    update_mode: rewrite
+    required: true
+
+  - path: memory/short-term.jsonl
+    tier: L1
+    format: jsonl
+    layer: 短期记忆
+    writable_by: [agent]
+    update_mode: append
+    required: true
+    read_policy: 读尾部 N 条（默认 30）或按 session_id 过滤
+
+  - path: memory/long-term/INDEX.md
+    tier: L2
+    format: markdown
+    layer: 长期记忆索引
+    writable_by: [agent]
+    update_mode: patch
+    required: true
+
+  - path: "memory/long-term/*.md"
+    tier: L3
+    format: markdown
+    layer: 长期记忆主题
+    writable_by: [agent]
+    update_mode: patch
+    required: false
+
+  # ---------- scenarios ----------
+  - path: scenarios/INDEX.md
+    tier: L1
+    format: markdown
+    layer: 场景路由
+    writable_by: [human, generator, agent]
+    update_mode: patch
+    required: true
+
+  - path: "scenarios/*.md"
+    tier: L2
+    format: markdown
+    layer: 场景剧本
+    writable_by: [human, generator, agent]
+    update_mode: patch
+    required: true
+
+# ---- 全局约定 ----
+conventions:
+  fill_marker: "@fill(who) 说明"        # 未补字段的标记；who = human | agent | generator
+  empty_scalar: '""'
+  empty_list: "[]"
+  provenance_fields: [source, confidence, observed_at]
+  source_enum: [seed, declared, observed, inferred]   # 预置 / 人工声明 / 运行观测 / 模型推断
+  timestamp_format: "ISO-8601 带时区，如 2026-09-03T14:30:00+08:00"
+  id_style: snake_case
+  currency: "{{CURRENCY}}"

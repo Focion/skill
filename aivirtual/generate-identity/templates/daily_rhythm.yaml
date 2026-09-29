@@ -1,0 +1,36 @@
+# ============================================================
+# 日常节律 · 所属身份: {{IDENTITY_ID}}
+# 身份蓝本其余部分是静态快照，本文件回答「现在是什么时候、他在干什么」。
+# temporal_context 与 current 由运行期按虚拟时间刷新；typical_day 是设计态。
+# ============================================================
+
+daily_rhythm:
+
+  temporal_context:
+    current_date: ""              # YYYY-MM-DD
+    current_time: ""              # HH:MM
+    day_of_week: ""
+    season: ""                    # spring / summer / autumn / winter
+    is_holiday: false
+    is_exam_period: false
+    recent_event: ""              # 最近的大事，会压住或抬高情绪基线
+
+  typical_day: []
+    # - time: ""                 # "07:00-08:00"
+    #   activity: ""
+    #   location: ""
+    #   mood_tendency: ""
+    #   energy_tendency: ""      # high / moderate / low
+    #   availability: ""         # available / busy / do_not_disturb / asleep
+
+  weekly_rhythm:
+    weekday: ""
+    weekend: ""
+    special_days: []
+
+  current:
+    activity: ""
+    location: ""
+    just_finished: ""
+    about_to_do: ""
+    interruptions: ""             # annoyed / neutral / welcoming

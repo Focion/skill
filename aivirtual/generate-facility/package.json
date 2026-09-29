@@ -1,0 +1,5 @@
+{
+  "name": "generate-facility",
+  "version": "2.0.0",
+  "description": "生成设施模型模板（多文件架构，按需加载）。输入 /generate-facility <设施类型> [描述] 生成 L0-L3 分层、按触发信号加载的设施模型目录。支持 22 种设施类型，种子/填充双模式。"
+}

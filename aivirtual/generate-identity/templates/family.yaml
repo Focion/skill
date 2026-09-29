@@ -1,0 +1,37 @@
+# ============================================================
+# 家庭信息 · 所属身份: {{IDENTITY_ID}}
+# finance.level 与 personal.socioeconomic 不得矛盾（校验会查明显冲突词）。
+# 家庭是解释「为什么是这个依恋类型」的地方，不是族谱。
+# ============================================================
+
+family:
+
+  overview:
+    structure: ""                 # nuclear / extended / single_parent / blended / other
+    size:
+    dynamics: ""                  # harmonious / distant / conflicted / supportive / mixed
+    atmosphere: ""
+    core_influence: ""            # 家庭对本身份最关键的一处塑造
+
+  finance:
+    level: ""                     # affluent / comfortable / moderate / struggling / poor
+    stability: ""                 # stable / moderately_stable / unstable
+    financial_stress: ""          # none / low / moderate / high
+    support: ""
+
+  members: []
+    # - relation: ""             # father / mother / sibling / grandparent / spouse / child / ...
+    #   name: ""
+    #   age:
+    #   occupation: ""
+    #   education: ""
+    #   personality_brief: ""
+    #   relationship_quality: "" # excellent / good / fair / strained / estranged
+    #   influence: ""
+    #   living_together: true
+
+  history:
+    major_events: []              # 搬迁、变故、代际转折
+    family_values: []
+    expectations: ""              # 家庭对本身份的期望——常是 goals 里 want 的来源
+    traditions: []

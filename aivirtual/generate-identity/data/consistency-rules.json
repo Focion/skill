@@ -1,0 +1,336 @@
+{
+  "schema_version": "1.0.0",
+  "skill_version": "2.0.0",
+  "_purpose": "身份蓝本的校验规则与查表，作为数据。scripts/validate.py 与运行时的 TS 校验器读同一份，避免两处各写一遍导致分叉。rules 分两级：machine 由代码判定、可阻塞落地；semantic 只能由人或 LLM 评审、永远只产 WARN。",
+
+  "files": {
+    "_count": "manifest.yaml + 19 个维度文件（13 基础 + 6 扩展）= 20 个文件",
+    "manifest": "manifest.yaml",
+    "base": [
+      "personal.yaml", "psychology.yaml", "health.yaml", "academic.yaml",
+      "skills.yaml", "social.yaml", "relationships.yaml", "family.yaml",
+      "specialties.yaml", "behavior.yaml", "goals.yaml", "constraints.yaml",
+      "evolution.yaml"
+    ],
+    "extended": [
+      "narrative_voice.yaml", "knowledge_boundaries.yaml", "shadow.yaml",
+      "scene_presets.yaml", "agent_protocol.yaml", "daily_rhythm.yaml"
+    ],
+    "optional": ["model_defaults.yaml", "provenance.yaml"],
+    "cold_start": [
+      "personal.yaml", "constraints.yaml", "evolution.yaml",
+      "narrative_voice.yaml", "agent_protocol.yaml"
+    ],
+    "empty_by_design": ["skills.yaml", "social.yaml", "specialties.yaml", "shadow.yaml"],
+    "_empty_by_design_why": "深层心理与技能/社交需交互揭示，授权期预设进去会成为错误依据。校验必须主动断言它们为空，不能只写在 prompt 里。"
+  },
+
+  "root_keys": {
+    "personal.yaml": "personal",
+    "psychology.yaml": "psychology",
+    "health.yaml": "health",
+    "academic.yaml": "academic",
+    "skills.yaml": "skills",
+    "social.yaml": "social",
+    "relationships.yaml": "relationships",
+    "family.yaml": "family",
+    "specialties.yaml": "specialties",
+    "behavior.yaml": "behavior",
+    "goals.yaml": "goals",
+    "constraints.yaml": "constraints",
+    "evolution.yaml": "evolution",
+    "narrative_voice.yaml": "narrative_voice",
+    "knowledge_boundaries.yaml": "knowledge_boundaries",
+    "shadow.yaml": "shadow",
+    "scene_presets.yaml": "scene_presets",
+    "agent_protocol.yaml": "agent_protocol",
+    "daily_rhythm.yaml": "daily_rhythm"
+  },
+
+  "required_fields": [
+    "personal.name.full",
+    "personal.age",
+    "psychology.personality.mbti",
+    "psychology.personality.big_five",
+    "psychology.personality.attachment_style",
+    "narrative_voice.fingerprint",
+    "evolution.state",
+    "agent_protocol.queries"
+  ],
+
+  "core_anchors": {
+    "_note": "四个核心设定锚点（DESIGN §25.3 步骤③）：必须先定下来再展开别的文件，且只能人工确认，种子模式填不了。它们是 required_fields 的子集，严重级同为 error —— 少了它们的骨架确实不能被 create() 实例化；种子模式下 validate.py 只在报告里注明这是待人工确认，不降级。",
+    "fields": [
+      "personal.name.full",
+      "personal.age",
+      "psychology.personality.mbti",
+      "psychology.personality.attachment_style"
+    ]
+  },
+
+  "enums": {
+    "psychology.personality.mbti": [
+      "INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP",
+      "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"
+    ],
+    "psychology.personality.attachment_style": ["secure", "anxious", "avoidant", "fearful_avoidant"],
+    "psychology.personality.self_esteem": ["high", "moderate", "low"],
+    "academic.education.level": ["primary", "middle", "high", "undergraduate", "graduate", "phd"],
+    "academic.education.school_type": ["public", "private", "international", "vocational"],
+    "academic.performance.overall": ["excellent", "above_average", "average", "below_average", "struggling"],
+    "family.finance.level": ["affluent", "comfortable", "moderate", "struggling", "poor"],
+    "family.finance.stability": ["stable", "moderately_stable", "unstable"],
+    "family.finance.financial_stress": ["none", "low", "moderate", "high"],
+    "narrative_voice.sensory.dominant_channel": ["visual", "auditory", "kinesthetic", "olfactory", "gustatory"],
+    "evolution.mood_decay.baseline_restoration": ["gradual", "sudden", "event_triggered"]
+  },
+
+  "enum_fields_list_items": {
+    "constraints.global[].severity": ["hard", "soft"],
+    "constraints.role[].severity": ["hard", "soft"],
+    "constraints.instance[].severity": ["hard", "soft"]
+  },
+
+  "ranges": {
+    "psychology.personality.big_five.openness": [0.0, 1.0],
+    "psychology.personality.big_five.conscientiousness": [0.0, 1.0],
+    "psychology.personality.big_five.extraversion": [0.0, 1.0],
+    "psychology.personality.big_five.agreeableness": [0.0, 1.0],
+    "psychology.personality.big_five.neuroticism": [0.0, 1.0],
+    "evolution.state.mood_intensity": [0.0, 1.0],
+    "evolution.state.energy_level": [0.0, 1.0],
+    "evolution.state.trust_level": [0.0, 1.0],
+    "evolution.state.engagement": [0.0, 1.0],
+    "evolution.mood_decay.intensity_decay_rate": [0.0, 1.0]
+  },
+
+  "tables": {
+    "stage_to_age": {
+      "_note": "仅当 academic.education.stage 非空（= 当前在读）时校验。范围含 ±1 岁容差，跳级/复读属正常。",
+      "小一": [6, 8], "小二": [7, 9], "小三": [8, 10],
+      "小四": [9, 11], "小五": [10, 12], "小六": [11, 13],
+      "初一": [12, 14], "初二": [13, 15], "初三": [14, 16],
+      "高一": [15, 17], "高二": [16, 18], "高三": [17, 19],
+      "大一": [17, 20], "大二": [18, 21], "大三": [19, 22], "大四": [20, 23],
+      "研一": [21, 26], "研二": [22, 27], "研三": [23, 28]
+    },
+    "stage_to_level": {
+      "小": "primary", "初": "middle", "高": "high", "大": "undergraduate", "研": "graduate"
+    },
+    "level_min_age": {
+      "_note": "不在读时 level 表示已取得的最高学历，只校验年龄下限。",
+      "primary": 6, "middle": 12, "high": 15,
+      "undergraduate": 18, "graduate": 22, "phd": 25
+    },
+    "finance_vs_socioeconomic": {
+      "_note": "socioeconomic 是自由文本，只查明显矛盾，不查相等。命中即 WARN。",
+      "affluent": ["贫困", "贫穷", "低收入", "底层", "struggling", "poor", "拮据", "困难"],
+      "comfortable": ["贫困", "贫穷", "低收入", "底层", "poor", "拮据"],
+      "moderate": ["富裕", "富有", "优渥", "上层", "affluent", "贫困", "贫穷", "poor"],
+      "struggling": ["富裕", "富有", "优渥", "上层", "高收入", "affluent", "中产以上"],
+      "poor": ["富裕", "富有", "优渥", "上层", "高收入", "affluent", "中产"]
+    },
+    "goal_horizons": {
+      "_note": "objectives 四档的名义时间窗（月）。文本是自由描述，语义上的「递增」代码判不了；能判的是两件事：①目标文本里出现明确时间表达时，它应落在本档窗口内；②两档文本完全相同说明没分层。都只产 WARN。",
+      "order": ["immediate", "short_term", "medium_term", "long_term"],
+      "windows": {
+        "immediate": [0, 3],
+        "short_term": [0, 12],
+        "medium_term": [12, 36],
+        "long_term": [36, 120]
+      },
+      "unit_months": { "年": 12, "个月": 1, "月": 1, "周": 0.25, "天": 0.033 },
+      "literal_months": { "本周": 0.25, "本月": 1, "半年": 6, "明年": 12, "今年": 6 }
+    },
+    "channel_synonyms": {
+      "_note": "dominant_channel 与 learning_style（自由文本）互相印证；无交集即 WARN。reading 一档只用于反查 learning_style 指向哪个通道，它不是 dominant_channel 的合法枚举值（见 enums）。",
+      "visual": ["visual", "视觉", "画图", "看图", "图像"],
+      "auditory": ["auditory", "听觉", "听讲", "朗读", "声音"],
+      "kinesthetic": ["kinesthetic", "动觉", "动手", "实验", "操作", "身体"],
+      "olfactory": ["olfactory", "嗅觉", "气味"],
+      "gustatory": ["gustatory", "味觉", "味道"],
+      "reading": ["reading", "阅读", "读写", "看书"]
+    }
+  },
+
+  "quality_minimums": {
+    "_note": "填充模式的「留有个性」要求（SKILL.md 填充模式规则 7）。空白模式下不适用，故只产 WARN。注意 skills.weak_areas 的属主文件在 empty_by_design 里，蓝本阶段校验器按属主文件显式跳过这一条；它只在运行期实例副本（skills.yaml 已被回写）上生效，所以留在这里而不是删掉。",
+    "psychology.cognition.cognitive_biases": 2,
+    "skills.weak_areas": 2,
+    "goals.fears": 1,
+    "behavior.sensitive_topics": 1
+  },
+
+  "budgets": {
+    "cold_start_total_tokens": 1600,
+    "single_file_tokens": 1200,
+    "_note": "冷启动 6 文件（manifest + 5 个 cold_start）全程进 system prompt，DESIGN §19.4 按 ~1200 标定，留 400 余量。超出即 WARN——它每轮都要付一次。"
+  },
+
+  "identity_id_pattern": "^id-\\d{8}-[a-z_]+-[a-z]{1,8}$",
+
+  "rules": [
+    {
+      "id": "M01",
+      "text": "manifest 中注册的 path 与实际文件一一对应（无缺失、无孤儿）",
+      "level": "machine", "severity": "error", "check": "manifest_disk_parity"
+    },
+    {
+      "id": "M02",
+      "text": "manifest 每个文件条目字段完整，priority ∈ {cold_start, on_demand}，initial_state ∈ {filled, empty}",
+      "level": "machine", "severity": "error", "check": "manifest_entry_schema"
+    },
+    {
+      "id": "M03",
+      "text": "cold_start 集合必须恰好是 personal / constraints / evolution / narrative_voice / agent_protocol（加 manifest 共 6 个）",
+      "level": "machine", "severity": "error", "check": "cold_start_set"
+    },
+    {
+      "id": "M04",
+      "text": "initial_state: empty 的文件必须真为空（skills / social / specialties / shadow 即使在填充模式下也留空）",
+      "level": "machine", "severity": "error", "check": "empty_by_design"
+    },
+    {
+      "id": "M05",
+      "text": "所有 YAML 可解析，必填字段存在且非空",
+      "level": "machine", "severity": "error", "check": "required_fields"
+    },
+    {
+      "id": "M06",
+      "text": "big_five 五项、evolution.state 各数值、evolution.mood_decay.intensity_decay_rate 都在 0.0-1.0 范围内",
+      "level": "machine", "severity": "error", "check": "ranges"
+    },
+    {
+      "id": "M07",
+      "text": "枚举字段取值合法：enums 的 11 个标量字段（mbti 16 型、attachment_style 4 型等）加 enum_fields_list_items 的 3 个列表项字段（constraints 三段的 severity 仅 hard/soft）",
+      "level": "machine", "severity": "error", "check": "enums"
+    },
+    {
+      "id": "M08",
+      "text": "personal.age 与 academic.education.stage / level 匹配（17 岁 → 高二，不能是小学）",
+      "level": "machine", "severity": "error", "check": "age_vs_education"
+    },
+    {
+      "id": "M09",
+      "text": "agent_protocol 整棵子树（queries/actions/events 全含）里出现的字段路径与文件名引用都能解析到已注册文件的已存在字段",
+      "level": "machine", "severity": "error", "check": "protocol_refs"
+    },
+    {
+      "id": "M10",
+      "text": "identity_id 格式为 id-<YYYYMMDD>-<role>-<name 拼音首字母>，且各文件头部所属身份与之一致",
+      "level": "machine", "severity": "warn", "check": "identity_id"
+    },
+    {
+      "id": "M11",
+      "text": "family.finance.level 与 personal.socioeconomic 不矛盾",
+      "level": "machine", "severity": "warn", "check": "finance_vs_socioeconomic"
+    },
+    {
+      "id": "M12",
+      "text": "narrative_voice.sensory.dominant_channel 与 psychology.cognition.learning_style 互相印证",
+      "level": "machine", "severity": "warn", "check": "channel_vs_learning_style"
+    },
+    {
+      "id": "M13",
+      "text": "goals.objectives 四档各自自洽：档内的显式时间表达落在该档窗口内、相邻档文本不完全相同、四档不只填一部分（窗口有重叠，故不做档间递增比较）",
+      "level": "machine", "severity": "warn", "check": "goal_horizons"
+    },
+    {
+      "id": "M14",
+      "text": "填充模式下「留有个性」的最低数量：认知偏差 ≥2、恐惧 ≥1、敏感话题 ≥1（短板 ≥2 属 skills.yaml，按 empty_by_design 留空故不参与计数）",
+      "level": "machine", "severity": "warn", "check": "quality_minimums"
+    },
+    {
+      "id": "M15",
+      "text": "冷启动 6 文件的 token 合计与单文件均未超预算（每轮都要付一次）；single_file_tokens 只施加于冷启动文件，按需文件只统计不告警",
+      "level": "machine", "severity": "warn", "check": "cold_start_budget"
+    },
+    {
+      "id": "M16",
+      "text": "on_demand 文件应有 load_trigger.keywords，否则永远不会被按需触发",
+      "level": "machine", "severity": "warn", "check": "on_demand_keywords"
+    },
+    {
+      "id": "M17",
+      "text": "注入的行业默认值应标 source: seed，供人确认",
+      "level": "machine", "severity": "info", "check": "seed_markers"
+    },
+
+    {
+      "id": "S01",
+      "text": "psychology.personality.mbti 与 behavior.interaction 一致（INTP 不应有「with_strangers: 热情主动搭话」）",
+      "level": "semantic", "severity": "warn",
+      "review_hint": "读 mbti 的 I/E 与 T/F 维度，对照 behavior.interaction 的 with_strangers / with_peers / when_criticized 三处措辞"
+    },
+    {
+      "id": "S02",
+      "text": "big_five 与 psychology.emotion / cognition 的描述一致",
+      "level": "semantic", "severity": "warn",
+      "review_hint": "neuroticism 高则 emotion.baseline 不应是「稳定平和」；conscientiousness 高则 cognition 不应「随性发散」"
+    },
+    {
+      "id": "S03",
+      "text": "attachment_style 与 relationships 各 entry 的 dynamic 一致（anxious 型不应有「不在乎对方是否回应」）",
+      "level": "semantic", "severity": "warn",
+      "review_hint": "逐条读 relationships[].dynamic，看是否有与依恋类型相反的行为描述"
+    },
+    {
+      "id": "S04",
+      "text": "goals.want_vs_need.want 与 goals.objectives 一致（want 是 objectives 背后的心理驱动力）",
+      "level": "semantic", "severity": "warn",
+      "review_hint": "objectives 是行为层，want 是动机层，两者应能构成因果"
+    },
+    {
+      "id": "S05",
+      "text": "goals.want_vs_need.awareness 与 shadow 呼应（unaware 时 shadow 应有对应 repressed_need）",
+      "level": "semantic", "severity": "info",
+      "review_hint": "授权期 shadow 按设计为空，此条只能在运行期回写后复核",
+      "applies_when": "shadow_not_empty"
+    },
+    {
+      "id": "S06",
+      "text": "narrative_voice.modes 各模式之间 fingerprint 一致（不能内心独白用短句而对话用长句）",
+      "level": "semantic", "severity": "warn",
+      "review_hint": "对比 modes 各段的句长、标点、比喻来源，应共享同一 fingerprint"
+    },
+    {
+      "id": "S07",
+      "text": "shadow.core_conflicts 与 psychology.values.dealbreakers 不矛盾",
+      "level": "semantic", "severity": "info",
+      "review_hint": "授权期 shadow 为空，此条留待运行期",
+      "applies_when": "shadow_not_empty"
+    },
+    {
+      "id": "S08",
+      "text": "knowledge_boundaries.known 与 skills.knowledge_domains 不矛盾",
+      "level": "semantic", "severity": "info",
+      "review_hint": "授权期 skills 为空，此条留待运行期回写后复核",
+      "applies_when": "skills_not_empty"
+    },
+    {
+      "id": "S09",
+      "text": "academic 的学历水平与 skills 的技能等级匹配",
+      "level": "semantic", "severity": "info",
+      "review_hint": "同上，skills 授权期为空",
+      "applies_when": "skills_not_empty"
+    },
+    {
+      "id": "S10",
+      "text": "描述里的每条信息都能在生成物里找到落点——逐条对照，漏了就补",
+      "level": "semantic", "severity": "warn",
+      "review_hint": "这条无法由蓝本自身判断，需要拿原始描述逐句核对；生成器应输出 allocation / unallocated 清单"
+    },
+    {
+      "id": "S11",
+      "text": "没有编造：所有具体数字、姓名、时间都能追溯到用户描述或标了 source: seed",
+      "level": "semantic", "severity": "warn",
+      "review_hint": "对照 provenance.yaml 的原始描述与 seeds 清单"
+    },
+    {
+      "id": "S12",
+      "text": "角色立体：有合理的缺点、偏差、矛盾点，不是模板化的完美角色",
+      "level": "semantic", "severity": "warn",
+      "review_hint": "M14 只查数量，这条查质量——缺点是否与人格相称，还是随便凑数"
+    }
+  ]
+}

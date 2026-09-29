@@ -1,0 +1,37 @@
+examples:
+  - id: order-platform-topology
+    title:
+      en: Diagram an Order Platform
+      zh: 绘制订单平台架构
+    description:
+      en: Create a tiered request-path diagram with a queue, database and cache, without inventing deployment details.
+      zh: 绘制包含队列、数据库和缓存的分层请求路径，不虚构部署细节。
+    prompt:
+      en: |-
+        Create a layered-horizontal HTML architecture diagram for Browser → API Gateway → Order Service. The service writes PostgreSQL, reads Redis and publishes to Kafka. Use English labels and language=en. Do not add unprovided replica counts, ports or SLOs. Save to a new file named order-platform.html in the agreed output directory without overwriting, run static validation, and report any untested browser checks. I need offline SVG download; PNG/PDF may remain unavailable without the original CDN scripts.
+      zh: |-
+        为“浏览器 → API 网关 → 订单服务”创建 layered-horizontal HTML 架构图。订单服务写入 PostgreSQL、读取 Redis 并向 Kafka 发布消息。使用英文标签和 language=en，不添加未提供的副本数、端口或 SLO。在约定输出目录中新建 order-platform.html，不覆盖已有文件，运行静态校验并说明未完成的浏览器检查。我需要离线下载 SVG；原 CDN 脚本不可用时，PNG/PDF 可以不可用。
+  - id: event-pipeline-diagram
+    title:
+      en: Map an Event Pipeline
+      zh: 绘制事件流水线
+    description:
+      en: Show Chinese-labeled data stages and distinguish known asynchronous and optional connections.
+      zh: 用中文标签展示数据阶段，区分已知的异步连接和可选连接。
+    prompt:
+      en: |-
+        Diagram this event pipeline with Chinese labels and language=zh-CN: Applications publish asynchronously to Kafka, Flink consumes Kafka and writes Iceberg, and Trino queries Iceberg. Flink optionally sends metrics to Prometheus. Use a hex for Kafka and a cylinder for Iceberg. Do not infer throughput or latency. Generate a new event-pipeline.html in the agreed output directory, validate it, and identify routing or browser-review limitations instead of promising no overlaps.
+      zh: |-
+        用中文标签和 language=zh-CN 绘制事件流水线：应用异步发布到 Kafka，Flink 消费 Kafka 并写入 Iceberg，Trino 查询 Iceberg；Flink 可选地向 Prometheus 发送指标。Kafka 用六边形，Iceberg 用圆柱，不推测吞吐量或延迟。在约定输出目录中新建 event-pipeline.html，执行校验，说明路由或浏览器复核限制，不承诺绝无重叠。
+  - id: review-existing-diagram
+    title:
+      en: Review an Existing Diagram
+      zh: 检查已有架构图
+    description:
+      en: Review geometry, endpoint metadata and offline/export behavior without modifying the input.
+      zh: 只读检查几何、端点元数据及离线与导出行为，不修改输入。
+    prompt:
+      en: |-
+        Review the HTML architecture diagram I supplied without changing it. Run the available static validator and inspect node groups, from/to metadata, bidirectional markers, collinear overlaps and text overflow. Distinguish permitted non-collinear crossings from errors. Explain that PNG needs html2canvas, PDF also needs jsPDF and is a one-page raster, and clipboard requires browser support and permission. Report browser/export checks as untested if unavailable; do not install dependencies or change permissions.
+      zh: |-
+        只读检查我提供的 HTML 架构图，不修改原文件。运行可用的静态校验器，检查节点分组、from/to 元数据、双向箭头、共线重合及文字溢出，区分允许的非共线交叉与错误。说明 PNG 依赖 html2canvas，PDF 还依赖 jsPDF 且为单页栅格图，剪贴板需要浏览器支持和权限。不可用的浏览器或导出检查标为未验证，不安装依赖、不修改权限。

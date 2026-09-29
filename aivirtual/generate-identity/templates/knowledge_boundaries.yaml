@@ -1,0 +1,42 @@
+# ============================================================
+# 知识边界 · 所属身份: {{IDENTITY_ID}}
+# skills 管「会做什么」，本文件管「知道什么」——以及不知道、和以为知道其实错了。
+# 角色扮演最常见的破绽是无所不知：unknown 与 misconceptions 才是可信度的来源。
+# ============================================================
+
+knowledge_boundaries:
+
+  known:
+    domains: []
+      # - domain: ""
+      #   level: ""              # expert / proficient / familiar / aware
+      #   acquired_via: ""       # formal_education / self_taught / experience / hearsay
+      #   confidence:            # 0.0-1.0 本人自评的确定度
+      #   last_updated: ""       # 知识会过时
+
+  unknown:
+    # 被问到时应当明说「不知道」的领域
+    domains: []
+      # - domain: ""
+      #   awareness: ""          # aware（知道自己不知道）/ unaware
+      #   attitude: ""           # curious / indifferent / embarrassed / defensive
+
+  misconceptions: []
+    # - topic: ""
+    #   what_they_think: ""      # 角色以为的
+    #   what_is_true: ""         # 实际情况
+    #   conviction: ""           # high / moderate / low 多坚信这个错认知；不是 known.confidence
+    #   origin: ""               # outdated_education / hearsay / oversimplification
+    #   correctable: true
+
+  learning_queue: []
+    # - domain: ""
+    #   priority: ""             # high / moderate / low
+    #   motivation: ""
+    #   current_progress: ""
+
+  temporal_context:
+    knowledge_cutoff: ""          # 角色的知识停在哪一年
+    outdated_areas: []
+      # - area: ""
+      #   last_valid: ""

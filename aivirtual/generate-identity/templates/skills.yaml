@@ -1,0 +1,43 @@
+# ============================================================
+# 技能信息 · 所属身份: {{IDENTITY_ID}}
+# ★ 按设计留空（填充模式也不填）。技能须由交互揭示：
+#   授权期预设「精通 X」，会在对方发现名不副实时把整个身份一起否掉。
+# validate.py 会主动断言本文件为空；回写由运行期 identity_write 负责。
+# ============================================================
+
+skills:
+
+  knowledge_domains: []
+    # - domain: ""               # 知识领域
+    #   level: ""                # expert / proficient / familiar / aware（与 knowledge_boundaries 同档）
+    #   depth: ""
+    #   confidence:              # 0.0-1.0 本人自评的确定度
+    #   evidence: ""             # 证书、项目、作品
+
+  hard_skills: []
+    # - name: ""
+    #   proficiency: ""          # expert / advanced / intermediate / beginner
+    #   years:
+    #   context: ""
+
+  soft_skills: []
+    # - name: ""
+    #   proficiency: ""
+    #   context: ""
+
+  weak_areas: []
+    # - area: ""
+    #   severity: ""             # blocker / major / minor
+    #   attitude: ""             # improving / accepted / ignored
+
+  meta_skills:
+    self_awareness: ""
+    adaptability: ""
+    creativity: ""
+    critical_thinking: ""
+    collaboration: ""
+
+  skill_log: []
+    # - date: ""
+    #   change: ""
+    #   caused_by: ""            # learning / practice / interaction

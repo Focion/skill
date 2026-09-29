@@ -1,0 +1,232 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cocoon-ai.com/schemas/architecture-diagram/spec.schema.json",
+  "title": "Architecture diagram spec",
+  "description": "Authoring contract for scripts/build_diagram.py. Describe components and relationships without coordinates. Only layered-horizontal is generated; port capacity, routing and text placement can reject a schema-valid spec. Start from resources/spec.example.json and validate the output.",
+  "$comment": "Documentation/editor completion, not a bundled JSON Schema runtime validator. The Python parser enforces input and geometry rules without dependencies and accepts some legacy optional-field forms more permissively than this schema. The upstream schema identifier is retained; local revision does not imply publication at that URL.",
+  "type": "object",
+  "required": ["title", "tiers"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional. Point your editor at ./spec.schema.json for completion."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Shown as the <h1> and in the browser tab. The system's real name."
+    },
+    "subtitle": {
+      "type": "string",
+      "description": "One line under the heading. Mixed CJK/Latin is fine."
+    },
+    "description": {
+      "type": "string",
+      "description": "The SVG's <desc>: one sentence a screen reader can use in place of the picture. Falls back to the subtitle, then the title."
+    },
+    "footer": {
+      "type": "string",
+      "description": "Footer line under the cards. Version, date, owning team."
+    },
+    "language": {
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
+      "default": "zh-CN",
+      "examples": ["zh-CN", "en"],
+      "description": "Optional HTML lang tag, checked by this syntax pattern rather than a language registry. Defaults to zh-CN; copied to standalone SVG on export. Does not translate component text, the Chinese toolbar or the English automatic legend."
+    },
+    "layout": {
+      "enum": ["layered-horizontal"],
+      "default": "layered-horizontal",
+      "description": "Only layered-horizontal is generated. Other archetypes are manual recipes using resources/template.html, not alternate generator modes. No self-loop routing or external layout engine is provided."
+    },
+    "tiers": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Columns, left to right. Each tier is one stage of the request path. Past about 5 tiers the viewBox grows wider than 1200 and the browser scrolls horizontally.",
+      "items": {
+        "type": "object",
+        "required": ["nodes"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Optional handle for the tier. Not rendered."
+          },
+          "label": {
+            "type": "string",
+            "description": "Optional column heading, drawn above the tier at 10px."
+          },
+          "nodes": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Stacked top to bottom, ROW_GAP = 40 apart. More than ~6 in one tier and the diagram grows taller than it is readable.",
+            "items": { "$ref": "#/definitions/node" }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "Directed connections with distinct ports at both ends. Adjacent/same-tier edges use gap tracks; skip-tier/return edges initially use exterior lanes, with bounded alternatives for conflicts. Orthogonal M/L paths permit non-collinear crossings but do not bundle collinear spans. Node heights and gaps may expand; unplaceable routes or labels fail. Output adds data-edge-id (edge-N by input order), data-from, data-to and data-bidirectional; these are not extra JSON fields.",
+      "items": { "$ref": "#/definitions/edge" }
+    },
+    "boundaries": {
+      "type": "array",
+      "description": "Frames derived from member bounds. Sets must be disjoint or strictly nested; identical sets and partial intersections fail. Current padding depth counts declared strict-subset frames, which can differ from longest nesting depth for sibling subframes. Inspect the output geometry.",
+      "items": { "$ref": "#/definitions/boundary" }
+    },
+    "notes": {
+      "type": "array",
+      "description": "Folded-corner annotations below the body/routes. The row of notes wraps; text within each note does not automatically wrap.",
+      "items": { "$ref": "#/definitions/note" }
+    },
+    "legend": {
+      "type": "boolean",
+      "default": true,
+      "description": "Strict JSON boolean. Builds an English legend from node types, non-solid edge styles, boundary kinds and modifiers, below all content. language does not translate it. Set false only when the diagram remains clear."
+    },
+    "cards": {
+      "type": "array",
+      "maxItems": 4,
+      "description": "Summary cards under the diagram. Use them for the facts that do not fit in a 220px box.",
+      "items": { "$ref": "#/definitions/card" }
+    }
+  },
+  "definitions": {
+    "node": {
+      "type": "object",
+      "required": ["id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$",
+          "description": "Unique across the spec. Referenced by edges and boundaries, and emitted as the node group's data-node-id. Notes do not reference node IDs."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The name line at 11px. Must fit 220px minus 28px of padding: about 29 Latin or 17 full-width characters. A longer name is a hard error, not a silent overflow — move the tail into subs."
+        },
+        "subs": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "maxItems": 3, "items": { "type": "string" } }
+          ],
+          "description": "Optional sublabel string or up to three strings at 9px. Non-cloud sublabels wrap, but the resulting lines must still number at most three. Clouds allow only one unwrapped sub and no simultaneous accent. Runtime, port, protocol, version and counts must come from user evidence."
+        },
+        "accent": {
+          "type": "string",
+          "description": "One type-coloured fact at 8px (domain, SLO, count). Emphasis only: in light mode most accent hues clear 3:1 but not the 4.5:1 small-text threshold, so never put a fact here that appears nowhere else."
+        },
+        "type": {
+          "enum": ["frontend", "backend", "database", "cache", "compute", "cloud", "bus", "security", "observability", "generic"],
+          "default": "generic",
+          "description": "Semantic colour. The palette stops at 10 on purpose: an 11th hue lands in the crowded blue/violet region and stops being distinguishable at a 1.5px stroke. For anything without a dedicated colour, reuse a type and change the SHAPE — see the mapping table in references/components.md."
+        },
+        "shape": {
+          "enum": ["rect", "cylinder", "hex", "actor", "stack", "cloud"],
+          "default": "rect",
+          "description": "rect: service; cylinder: datastore; hex: queue/bus; actor: human/external organisation with labels below; stack: multi-instance; cloud: external network/edge. Hex shoulders cost 24px of text width. Cloud is fixed 140x70, with a name plus one sub OR accent, each at most 90px estimated width. Actor/cloud side capacities are 2/3 ports respectively, counting incoming and outgoing incidences; excess is a hard error. Other shapes can gain height for ports. Rendered nodes use g[data-node-id][data-shape]."
+        },
+        "badge": {
+          "type": "string",
+          "description": "Status or version chip on the top-right corner, 8px. The chip is the text plus 16px, and it must fit the node's own width minus 12px, so roughly 'v2.1' to 'deprecated' on a default 110px box — longer is a hard error. Not available on shape=actor, which has no corner to hang it on."
+        },
+        "modifier": {
+          "enum": ["dimmed", "highlight"],
+          "description": "dimmed = deprecated, planned or out of scope; highlight = the one component the user asked about. Both are claims about importance and get an automatic legend entry, because an unexplained dimmed node just looks like a mistake and two highlights highlight nothing."
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "type": "string", "description": "Existing source node ID. Self-loops (from equals to) are rejected by the generator." },
+        "to": { "type": "string", "description": "Existing target node ID. Cross-reference validity is checked by the generator, not by JSON Schema alone." },
+        "label": {
+          "type": "string",
+          "description": "Protocol, format or rate, at 9px beside the line. In a data pipeline label every edge — the edges carry the meaning."
+        },
+        "type": {
+          "enum": ["frontend", "backend", "database", "cache", "compute", "cloud", "bus", "security", "observability", "generic"],
+          "description": "Line colour. Defaults to the TARGET's type, so a chain reads as a gradient into the data layer."
+        },
+        "style": {
+          "enum": ["solid", "dashed", "dotted", "thick", "thin"],
+          "default": "solid",
+          "description": "dashed: async/auth; dotted: optional; thick: primary request path (prefer one); thin: secondary/inline connector. Fixed marker size is independent of stroke width."
+        },
+        "bidirectional": {
+          "type": "boolean",
+          "default": false,
+          "description": "Strict JSON boolean, not a string or number. Adds a mirrored start marker; true with dashed is rejected. Markers are fixed 10x8 userSpaceOnUse, viewBox 0 0 10 8, end reference (6,4), start (4,4). Tips extend 4px beyond path endpoints; target and bidirectional-source endpoints retreat 6px for 2px tip clearance. Ordinary source retreat is 2px. All semantic types, including generic, use arrowhead-{type}/arrowhead-start-{type}; neutral aliases are only for untyped hand-authored arrows."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["bidirectional"], "properties": { "bidirectional": { "const": true } } },
+          "then": { "properties": { "style": { "not": { "const": "dashed" } } } }
+        }
+      ]
+    },
+    "boundary": {
+      "type": "object",
+      "required": ["label", "members"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Drawn top-left at 10px semibold, e.g. 'vpc-prod 10.0.0.0/16'. A label wider than the members widens the frame (and every frame around it) rather than hanging out of the side, so keep it short or the frame grows until it swallows a neighbouring node — which is then a hard error."
+        },
+        "kind": {
+          "enum": ["region", "vpc", "az", "sg"],
+          "default": "region",
+          "description": "region = cloud region, account or datacenter; vpc = VPC or VNet; az = availability zone; sg = security group, subnet or firewall scope. Each has its own dash pattern."
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "Node ids. A boundary is an axis-aligned rect, so any node whose bbox falls inside it is visually a member whether you meant it or not — the generator rejects a frame that would enclose a non-member and tells you to reorder the tiers."
+        }
+      }
+    },
+    "note": {
+      "type": "object",
+      "required": ["text"],
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" }, "minItems": 1, "maxItems": 4 }
+          ],
+          "description": "One string or one to four pre-split lines, left-aligned at 9px. No automatic line wrapping inside a note. Empty arrays and more than four lines are errors. The row of notes wraps below the body, but a single wide note can still widen the viewBox."
+        }
+      }
+    },
+    "card": {
+      "type": "object",
+      "required": ["title", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "color": {
+          "enum": ["cyan", "emerald", "violet", "amber", "rose", "blue", "fuchsia", "lime", "slate"],
+          "default": "cyan",
+          "description": "The dot beside the card heading. These are page-chrome colours, independent of the SVG type palette."
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
